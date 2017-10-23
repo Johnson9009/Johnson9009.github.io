@@ -16,4 +16,5 @@ author: "Johnson Zhang"
     ``` shell
     hugo new post/post-name.md
     ```
+3. Test Travis CI.
 <!--more-->
