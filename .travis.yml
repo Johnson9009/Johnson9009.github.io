@@ -5,6 +5,10 @@ script:
   - cd src
   - ../bin/hugo
 
+branches:
+  only:
+  - gh-pages
+
 deploy:
   provider: pages
   skip_cleanup: true
