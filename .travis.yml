@@ -1,5 +1,5 @@
 install:
-  - rm -rf public || exit 0
+  - rm -rf src/public || exit 0
 
 script:
   - cd src
@@ -12,7 +12,7 @@ branches:
 deploy:
   provider: pages
   skip_cleanup: true
-  local_dir: public
+  local_dir: src/public
   target_branch: master
   github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
   on:
