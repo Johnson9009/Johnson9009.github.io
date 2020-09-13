@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>How debuggers work: Part 2 – Breakpoints - 迷失岁月</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Johnson" />
+  <meta name="description" content="Reproduce from http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints This is the second part in a series of articles on how debuggers work. Make sure you read the first part before this one.
+In this part I&amp;#8217;m going to demonstrate how breakpoints are implemented in a debugger. Breakpoints are one of the two main pillars of debugging &amp;#8211; the other being able to inspect values in the debugged process&amp;#8217;s memory. We&amp;#8217;ve already seen a preview of the other pillar in part 1 of the series, but breakpoints still remain mysterious. By the end of this article, they won&amp;#8217;t be.
+Software interrupts To implement breakpoints on the x86 architecture, software interrupts (also known as &amp;ldquo;traps&amp;rdquo;) are used. Before we get deep into the details, I want to explain the concept of interrupts and traps in general.
+A CPU has a single stream of execution, working through instructions one by one 1. To handle asynchronous events like IO and hardware timers, CPUs use interrupts. A hardware interrupt is usually a dedicated electrical signal to which a special &amp;ldquo;response circuitry&amp;rdquo; is attached. This circuitry notices an activation of the interrupt and makes the CPU stop its current execution, save its state, and jump to a predefined address where a handler routine for the interrupt is located. When the handler finishes its work, the CPU resumes execution from where it stopped.
+ Software interrupts are similar in principle but a bit different in practice. CPUs support special instructions that allow the software to simulate an interrupt. When such an instruction is executed, the CPU treats it like an interrupt &amp;#8211; stops its normal flow of execution, saves its state and jumps to a handler routine. Such &amp;ldquo;traps&amp;rdquo; allow many of the wonders of modern OSes (task scheduling, virtual memory, memory protection, debugging) to be implemented efficiently.
+" />
+
+  <meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<link rel="canonical" href="https://johnson9009.github.io/post/how-debuggers-work-part-2-breakpoints/" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" href="/favicon.ico" />
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<link href="/dist/even.min.css?v=2.6.4" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+<meta property="og:title" content="How debuggers work: Part 2 – Breakpoints" />
+<meta property="og:description" content="
+  Reproduce from http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints
+
+
+This is the second part in a series of articles on how debuggers work. Make sure you read the first part before this one.
+
+In this part
+
+I&#8217;m going to demonstrate how breakpoints are implemented in a debugger. Breakpoints are one of the two main pillars of debugging &#8211; the other being able to inspect values in the debugged process&#8217;s memory. We&#8217;ve already seen a preview of the other pillar in part 1 of the series, but breakpoints still remain mysterious. By the end of this article, they won&#8217;t be.
+
+Software interrupts
+
+To implement breakpoints on the x86 architecture, software interrupts (also known as &ldquo;traps&rdquo;) are used. Before we get deep into the details, I want to explain the concept of interrupts and traps in general.
+
+A CPU has a single stream of execution, working through instructions one by one 1. To handle asynchronous events like IO and hardware timers, CPUs use interrupts. A hardware interrupt is usually a dedicated electrical signal to which a special &ldquo;response circuitry&rdquo; is attached. This circuitry notices an activation of the interrupt and makes the CPU stop its current execution, save its state, and jump to a predefined address where a handler routine for the interrupt is located. When the handler finishes its work, the CPU resumes execution from where it stopped.
+
+
+  
+
+
+Software interrupts are similar in principle but a bit different in practice. CPUs support special instructions that allow the software to simulate an interrupt. When such an instruction is executed, the CPU treats it like an interrupt &#8211; stops its normal flow of execution, saves its state and jumps to a handler routine. Such &ldquo;traps&rdquo; allow many of the wonders of modern OSes (task scheduling, virtual memory, memory protection, debugging) to be implemented efficiently." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://johnson9009.github.io/post/how-debuggers-work-part-2-breakpoints/" />
+
+
+
+<meta property="article:published_time" content="2016-08-05T07:54:45&#43;00:00"/>
+
+<meta property="article:modified_time" content="2016-08-05T07:54:45&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="How debuggers work: Part 2 – Breakpoints">
+<meta itemprop="description" content="
+  Reproduce from http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints
+
+
+This is the second part in a series of articles on how debuggers work. Make sure you read the first part before this one.
+
+In this part
+
+I&#8217;m going to demonstrate how breakpoints are implemented in a debugger. Breakpoints are one of the two main pillars of debugging &#8211; the other being able to inspect values in the debugged process&#8217;s memory. We&#8217;ve already seen a preview of the other pillar in part 1 of the series, but breakpoints still remain mysterious. By the end of this article, they won&#8217;t be.
+
+Software interrupts
+
+To implement breakpoints on the x86 architecture, software interrupts (also known as &ldquo;traps&rdquo;) are used. Before we get deep into the details, I want to explain the concept of interrupts and traps in general.
+
+A CPU has a single stream of execution, working through instructions one by one 1. To handle asynchronous events like IO and hardware timers, CPUs use interrupts. A hardware interrupt is usually a dedicated electrical signal to which a special &ldquo;response circuitry&rdquo; is attached. This circuitry notices an activation of the interrupt and makes the CPU stop its current execution, save its state, and jump to a predefined address where a handler routine for the interrupt is located. When the handler finishes its work, the CPU resumes execution from where it stopped.
+
+
+  
+
+
+Software interrupts are similar in principle but a bit different in practice. CPUs support special instructions that allow the software to simulate an interrupt. When such an instruction is executed, the CPU treats it like an interrupt &#8211; stops its normal flow of execution, saves its state and jumps to a handler routine. Such &ldquo;traps&rdquo; allow many of the wonders of modern OSes (task scheduling, virtual memory, memory protection, debugging) to be implemented efficiently.">
+
+
+<meta itemprop="datePublished" content="2016-08-05T07:54:45&#43;00:00" />
+<meta itemprop="dateModified" content="2016-08-05T07:54:45&#43;00:00" />
+<meta itemprop="wordCount" content="3577">
+
+
+
+<meta itemprop="keywords" content="C/C&#43;&#43;,Debug,Linux," />
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="How debuggers work: Part 2 – Breakpoints"/>
+<meta name="twitter:description" content="
+  Reproduce from http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints
+
+
+This is the second part in a series of articles on how debuggers work. Make sure you read the first part before this one.
+
+In this part
+
+I&#8217;m going to demonstrate how breakpoints are implemented in a debugger. Breakpoints are one of the two main pillars of debugging &#8211; the other being able to inspect values in the debugged process&#8217;s memory. We&#8217;ve already seen a preview of the other pillar in part 1 of the series, but breakpoints still remain mysterious. By the end of this article, they won&#8217;t be.
+
+Software interrupts
+
+To implement breakpoints on the x86 architecture, software interrupts (also known as &ldquo;traps&rdquo;) are used. Before we get deep into the details, I want to explain the concept of interrupts and traps in general.
+
+A CPU has a single stream of execution, working through instructions one by one 1. To handle asynchronous events like IO and hardware timers, CPUs use interrupts. A hardware interrupt is usually a dedicated electrical signal to which a special &ldquo;response circuitry&rdquo; is attached. This circuitry notices an activation of the interrupt and makes the CPU stop its current execution, save its state, and jump to a predefined address where a handler routine for the interrupt is located. When the handler finishes its work, the CPU resumes execution from where it stopped.
+
+
+  
+
+
+Software interrupts are similar in principle but a bit different in practice. CPUs support special instructions that allow the software to simulate an interrupt. When such an instruction is executed, the CPU treats it like an interrupt &#8211; stops its normal flow of execution, saves its state and jumps to a handler routine. Such &ldquo;traps&rdquo; allow many of the wonders of modern OSes (task scheduling, virtual memory, memory protection, debugging) to be implemented efficiently."/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">The Time When I Feel Lost ...</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">The Time When I Feel Lost ...</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">How debuggers work: Part 2 – Breakpoints</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-08-05 </span>
+        <div class="post-category">
+            <a href="/categories/c/c&#43;&#43;/">C/C&#43;&#43;</a><a href="/categories/%E8%BD%AF%E4%BB%B6%E8%B0%83%E8%AF%95/">软件调试</a>
+          </div>
+        
+      </div>
+    </header>
+
+    
+    
+<div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#in-this-part">In this part</a></li>
+<li><a href="#software-interrupts">Software interrupts</a></li>
+<li><a href="#int-3-in-theory">int 3 in theory</a></li>
+<li><a href="#int-3-in-practice">int 3 in practice</a></li>
+<li><a href="#setting-breakpoints-manually">Setting breakpoints manually</a></li>
+<li><a href="#digression-8211-process-addresses-and-entry-point">Digression &#8211; process addresses and entry point</a></li>
+<li><a href="#setting-breakpoints-in-the-debugger-with-int-3">Setting breakpoints in the debugger with int 3</a></li>
+<li><a href="#more-on-int-3">More on int 3</a></li>
+<li><a href="#encapsulating-some-gory-details">Encapsulating some gory details</a></li>
+<li><a href="#tracing-a-c-program">Tracing a C program</a></li>
+<li><a href="#the-code">The code</a></li>
+<li><a href="#conclusion-and-next-steps">Conclusion and next steps</a></li>
+<li><a href="#references">References</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+
+    
+    <div class="post-content">
+      <p align="right">
+  <font color="#ff0000"><strong>Reproduce from</strong> <a title="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints" href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints"><strong>http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints</strong></a></font>
+</p>
+
+<p>This is the second part in a series of articles on how debuggers work. Make sure you read <a href="http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/">the first part</a> before this one.</p>
+
+<h5 id="in-this-part">In this part</h5>
+
+<p>I&#8217;m going to demonstrate how breakpoints are implemented in a debugger. Breakpoints are one of the two main pillars of debugging &#8211; the other being able to inspect values in the debugged process&#8217;s memory. We&#8217;ve already seen a preview of the other pillar in part 1 of the series, but breakpoints still remain mysterious. By the end of this article, they won&#8217;t be.</p>
+
+<h5 id="software-interrupts">Software interrupts</h5>
+
+<p>To implement breakpoints on the x86 architecture, software interrupts (also known as &ldquo;traps&rdquo;) are used. Before we get deep into the details, I want to explain the concept of interrupts and traps in general.</p>
+
+<p>A CPU has a single stream of execution, working through instructions one by one <a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id7"><a href="http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/">1</a></a>. To handle asynchronous events like IO and hardware timers, CPUs use interrupts. A hardware interrupt is usually a dedicated electrical signal to which a special &ldquo;response circuitry&rdquo; is attached. This circuitry notices an activation of the interrupt and makes the CPU stop its current execution, save its state, and jump to a predefined address where a handler routine for the interrupt is located. When the handler finishes its work, the CPU resumes execution from where it stopped.</p>
+
+<div align="right">
+  
+</div>
+
+<p>Software interrupts are similar in principle but a bit different in practice. CPUs support special instructions that allow the software to simulate an interrupt. When such an instruction is executed, the CPU treats it like an interrupt &#8211; stops its normal flow of execution, saves its state and jumps to a handler routine. Such &ldquo;traps&rdquo; allow many of the wonders of modern OSes (task scheduling, virtual memory, memory protection, debugging) to be implemented efficiently.</p>
+
+<p>Some programming errors (such as division by 0) are also treated by the CPU as traps, and are frequently referred to as &ldquo;exceptions&rdquo;. Here the line between hardware and software blurs, since it&#8217;s hard to say whether such exceptions are really hardware interrupts or software interrupts. But I&#8217;ve digressed too far away from the main topic, so it&#8217;s time to get back to breakpoints.</p>
+
+<h5 id="int-3-in-theory">int 3 in theory</h5>
+
+<p>Having written the previous section, I can now simply say that breakpoints are implemented on the CPU by a special trap called <tt>int 3</tt>. <tt>int</tt> is x86 jargon for &ldquo;trap instruction&rdquo; &#8211; a call to a predefined interrupt handler. x86 supports the <tt>int</tt> instruction with a 8-bit operand specifying the number of the interrupt that occurred, so in theory 256 traps are supported. The first 32 are reserved by the CPU for itself, and number 3 is the one we&#8217;re interested in here &#8211; it&#8217;s called &ldquo;trap to debugger&rdquo;.</p>
+
+<p>Without further ado, I&#8217;ll quote from the bible itself <a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id8"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id7">2</a></a>:</p>
+
+<blockquote>
+<p>The INT 3 instruction generates a special one byte opcode (CC) that is intended for calling<br />
+the debug exception handler. (This one byte form is valuable because it can be used to replace<br />
+the first byte of any instruction with a breakpoint, including other one byte instructions, without<br />
+over-writing other code).</p>
+</blockquote>
+
+<p>The part in parens is important, but it&#8217;s still too early to explain it. We&#8217;ll come back to it later in this article.</p>
+
+<h5 id="int-3-in-practice">int 3 in practice</h5>
+
+<p>Yes, knowing the theory behind things is great, OK, but what does this really mean? How do we use <tt>int 3</tt>to implement breakpoints? Or to paraphrase common programming Q&amp;A jargon &#8211; <em>Plz show me the codes!</em></p>
+
+<p>In practice, this is really very simple. Once your process executes the <tt>int 3</tt> instruction, the OS stops it <a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id9"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id8">3</a></a>. On Linux (which is what we&#8217;re concerned with in this article) it then sends the process a signal &#8211;<tt>SIGTRAP</tt>.</p>
+
+<p>That&#8217;s all there is to it &#8211; honest! Now recall from the first part of the series that a tracing (debugger) process gets notified of all the signals its child (or the process it attaches to for debugging) gets, and you can start getting a feel of where we&#8217;re going.</p>
+
+<p>That&#8217;s it, no more computer architecture 101 jabber. It&#8217;s time for examples and code.</p>
+
+<h5 id="setting-breakpoints-manually">Setting breakpoints manually</h5>
+
+<p>I&#8217;m now going to show code that sets a breakpoint in a program. The target program I&#8217;m going to use for this demonstration is the following:</p>
+
+<blockquote>
+<p>section&#160;&#160;&#160; .text<br />
+&#160;&#160;&#160; ; The _start symbol must be declared for the linker (ld)<br />
+&#160;&#160;&#160; global _start</p>
+
+<p>_start:</p>
+
+<p>&#160;&#160;&#160; ; Prepare arguments for the sys_write system call:<br />
+&#160;&#160;&#160; ;&#160;&#160; &#8211; eax: system call number (sys_write)<br />
+&#160;&#160;&#160; ;&#160;&#160; &#8211; ebx: file descriptor (stdout)<br />
+&#160;&#160;&#160; ;&#160;&#160; &#8211; ecx: pointer to string<br />
+&#160;&#160;&#160; ;&#160;&#160; &#8211; edx: string length<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; edx, len1<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; ecx, msg1<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; ebx, 1<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; eax, 4</p>
+
+<p>&#160;&#160;&#160; ; Execute the sys_write system call<br />
+&#160;&#160;&#160; int&#160;&#160;&#160;&#160; 0x80</p>
+
+<p>&#160;&#160;&#160; ; Now print the other message<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; edx, len2<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; ecx, msg2<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; ebx, 1<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; eax, 4<br />
+&#160;&#160;&#160; int&#160;&#160;&#160;&#160; 0x80</p>
+
+<p>&#160;&#160;&#160; ; Execute sys_exit<br />
+&#160;&#160;&#160; mov&#160;&#160;&#160;&#160; eax, 1<br />
+&#160;&#160;&#160; int&#160;&#160;&#160;&#160; 0x80</p>
+
+<p>section&#160;&#160;&#160; .data</p>
+
+<p>msg1&#160;&#160;&#160; db&#160;&#160;&#160;&#160;&#160; &#8216;Hello,&#8217;, 0xa<br />
+len1&#160;&#160;&#160; equ&#160;&#160;&#160;&#160; $ &#8211; msg1<br />
+msg2&#160;&#160;&#160; db&#160;&#160;&#160;&#160;&#160; &#8216;world!&#8217;, 0xa<br />
+len2&#160;&#160;&#160; equ&#160;&#160;&#160;&#160; $ &#8211; msg2</p>
+</blockquote>
+
+<p>I&#8217;m using assembly language for now, in order to keep us clear of compilation issues and symbols that come up when we get into C code. What the program listed above does is simply print &ldquo;Hello,&rdquo; on one line and then &ldquo;world!&rdquo; on the next line. It&#8217;s very similar to the program demonstrated in the previous article.</p>
+
+<p>I want to set a breakpoint after the first printout, but before the second one. Let&#8217;s say right after the first <tt>int 0x80</tt> <a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id10"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id9">4</a></a>, on the <tt>mov edx, len2</tt> instruction. First, we need to know what address this instruction maps to. Running <tt>objdump -d</tt>:</p>
+
+<blockquote>
+<p>traced_printer2:&#160;&#160;&#160;&#160; file format elf32-i386</p>
+
+<p>Sections:<br />
+Idx Name&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; Size&#160;&#160;&#160;&#160;&#160; VMA&#160;&#160;&#160;&#160;&#160;&#160; LMA&#160;&#160;&#160;&#160;&#160;&#160; File off&#160; Algn<br />
+&#160; 0 .text&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 00000033&#160; 08048080&#160; 08048080&#160; 00000080&#160; 2<strong>4<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, ALLOC, LOAD, READONLY, CODE<br />
+&#160; 1 .data&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0000000e&#160; 080490b4&#160; 080490b4&#160; 000000b4&#160; 2</strong>2<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, ALLOC, LOAD, DATA</p>
+
+<p>Disassembly of section .text:</p>
+
+<p>08048080 &lt;.text&gt;:<br />
+8048080:&#160;&#160;&#160;&#160; ba 07 00 00 00&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x7,%edx<br />
+8048085:&#160;&#160;&#160;&#160; b9 b4 90 04 08&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x80490b4,%ecx<br />
+804808a:&#160;&#160;&#160;&#160; bb 01 00 00 00&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x1,%ebx<br />
+804808f:&#160;&#160;&#160;&#160; b8 04 00 00 00&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x4,%eax<br />
+8048094:&#160;&#160;&#160;&#160; cd 80&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; int&#160;&#160;&#160; $0x80<br />
+8048096:&#160;&#160;&#160;&#160; ba 07 00 00 00&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x7,%edx<br />
+804809b:&#160;&#160;&#160;&#160; b9 bb 90 04 08&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x80490bb,%ecx<br />
+80480a0:&#160;&#160;&#160;&#160; bb 01 00 00 00&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x1,%ebx<br />
+80480a5:&#160;&#160;&#160;&#160; b8 04 00 00 00&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x4,%eax<br />
+80480aa:&#160;&#160;&#160;&#160; cd 80&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; int&#160;&#160;&#160; $0x80<br />
+80480ac:&#160;&#160;&#160;&#160; b8 01 00 00 00&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; $0x1,%eax<br />
+80480b1:&#160;&#160;&#160;&#160; cd 80&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; int&#160;&#160;&#160; $0x80</p>
+</blockquote>
+
+<p>So, the address we&#8217;re going to set the breakpoint on is 0x8048096. Wait, this is not how real debuggers work, right? Real debuggers set breakpoints on lines of code and on functions, not on some bare memory addresses? Exactly right. But we&#8217;re still far from there &#8211; to set breakpoints like <em>real</em> debuggers we still have to cover symbols and debugging information first, and it will take another part or two in the series to reach these topics. For now, we&#8217;ll have to do with bare memory addresses.</p>
+
+<p>At this point I really want to digress again, so you have two choices. If it&#8217;s really interesting for you to know <em>why</em> the address is 0x8048096 and what does it mean, read the next section. If not, and you just want to get on with the breakpoints, you can safely skip it.</p>
+
+<h5 id="digression-8211-process-addresses-and-entry-point">Digression &#8211; process addresses and entry point</h5>
+
+<p>Frankly, 0x8048096 itself doesn&#8217;t mean much, it&#8217;s just a few bytes away from the beginning of the text section of the executable. If you look carefully at the dump listing above, you&#8217;ll see that the text section starts at 0x08048080. This tells the OS to map the text section starting at this address in the virtual address space given to the process. On Linux these addresses can be absolute (i.e. the executable isn&#8217;t being relocated when it&#8217;s loaded into memory), because with the virtual memory system each process gets its own chunk of memory and sees the whole 32-bit address space as its own (called &ldquo;linear&rdquo; address).</p>
+
+<p>If we examine the ELF <a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id11"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id10">5</a></a> header with <tt>readelf</tt>, we get:</p>
+
+<blockquote>
+<p>$ readelf -h traced_printer2<br />
+ELF Header:<br />
+&#160; Magic:&#160;&#160; 7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00<br />
+&#160; Class:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; ELF32<br />
+&#160; Data:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 2&#8217;s complement, little endian<br />
+&#160; Version:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 1 (current)<br />
+&#160; OS/ABI:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; UNIX &#8211; System V<br />
+&#160; ABI Version:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0<br />
+&#160; Type:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; EXEC (Executable file)<br />
+&#160; Machine:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; Intel 80386<br />
+&#160; Version:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x1<br />
+&#160; Entry point address:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x8048080<br />
+&#160; Start of program headers:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 52 (bytes into file)<br />
+&#160; Start of section headers:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 220 (bytes into file)<br />
+&#160; Flags:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x0<br />
+&#160; Size of this header:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 52 (bytes)<br />
+&#160; Size of program headers:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 32 (bytes)<br />
+&#160; Number of program headers:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 2<br />
+&#160; Size of section headers:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 40 (bytes)<br />
+&#160; Number of section headers:&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 4<br />
+&#160; Section header string table index: 3</p>
+</blockquote>
+
+<p>Note the &ldquo;entry point address&rdquo; section of the header, which also points to 0x8048080. So if we interpret the directions encoded in the ELF file for the OS, it says:</p>
+
+<ol>
+<li>Map the text section (with given contents) to address 0x8048080</li>
+<li>Start executing at the entry point &#8211; address 0x8048080</li>
+</ol>
+
+<p>But still, why 0x8048080? For historic reasons, it turns out. Some googling led me to a few sources that claim that the first 128MB of each process&#8217;s address space were reserved for the stack. 128MB happens to be 0x8000000, which is where other sections of the executable may start. 0x8048080, in particular, is the default entry point used by the Linux <tt>ld</tt> linker. This entry point can be modified by passing the <tt>-Ttext</tt>argument to <tt>ld</tt>.</p>
+
+<p>To conclude, there&#8217;s nothing really special in this address and we can freely change it. As long as the ELF executable is properly structured and the entry point address in the header matches the real beginning of the program&#8217;s code (text section), we&#8217;re OK.</p>
+
+<h5 id="setting-breakpoints-in-the-debugger-with-int-3">Setting breakpoints in the debugger with int 3</h5>
+
+<p>To set a breakpoint at some target address in the traced process, the debugger does the following:</p>
+
+<ol>
+<li>Remember the data stored at the target address</li>
+<li>Replace the first byte at the target address with the int 3 instruction</li>
+</ol>
+
+<p>Then, when the debugger asks the OS to run the process (with <tt>PTRACE_CONT</tt> as we saw in the previous article), the process will run and eventually hit upon the <tt>int 3</tt>, where it will stop and the OS will send it a signal. This is where the debugger comes in again, receiving a signal that its child (or traced process) was stopped. It can then:</p>
+
+<ol>
+<li>Replace the int 3 instruction at the target address with the original instruction</li>
+<li>Roll the instruction pointer of the traced process back by one. This is needed because the instruction pointer now points <em>after</em> the <tt>int 3</tt>, having already executed it.</li>
+<li>Allow the user to interact with the process in some way, since the process is still halted at the desired target address. This is the part where your debugger lets you peek at variable values, the call stack and so on.</li>
+<li>When the user wants to keep running, the debugger will take care of placing the breakpoint back (since it was removed in step 1) at the target address, unless the user asked to cancel the breakpoint.</li>
+</ol>
+
+<p>Let&#8217;s see how some of these steps are translated into real code. We&#8217;ll use the debugger &ldquo;template&rdquo; presented in part 1 (forking a child process and tracing it). In any case, there&#8217;s a link to the full source code of this example at the end of the article.</p>
+
+<blockquote>
+<p>/* Obtain and show child&#8217;s instruction pointer */<br />
+ptrace(PTRACE_GETREGS, child_pid, 0, &amp;regs);<br />
+procmsg(&ldquo;Child started. EIP = 0x%08x\n&rdquo;, regs.eip);</p>
+
+<p>/* Look at the word at the address we&#8217;re interested in */<br />
+unsigned addr = 0x8048096;<br />
+unsigned data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, 0);<br />
+procmsg(&ldquo;Original data at 0x%08x: 0x%08x\n&rdquo;, addr, data);</p>
+</blockquote>
+
+<p>Here the debugger fetches the instruction pointer from the traced process, as well as examines the word currently present at 0x8048096. When run tracing the assembly program listed in the beginning of the article, this prints:</p>
+
+<blockquote>
+<p>[13028] Child started. EIP = 0x08048080<br />
+[13028] Original data at 0x08048096: 0x000007ba</p>
+</blockquote>
+
+<p>So far, so good. Next:</p>
+
+<blockquote>
+<p>/* Write the trap instruction &#8216;int 3&#8217; into the address */<br />
+unsigned data_with_trap = (data &amp; 0xFFFFFF00) | 0xCC;<br />
+ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data_with_trap);</p>
+
+<p>/* See what&#8217;s there again&#8230; */<br />
+unsigned readback_data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, 0);<br />
+procmsg(&ldquo;After trap, data at 0x%08x: 0x%08x\n&rdquo;, addr, readback_data);</p>
+</blockquote>
+
+<p>Note how <tt>int 3</tt> is inserted at the target address. This prints:</p>
+
+<blockquote>
+<p>[13028] After trap, data at 0x08048096: 0x000007cc</p>
+</blockquote>
+
+<p>Again, as expected &#8211; <tt>0xba</tt> was replaced with <tt>0xcc</tt>. The debugger now runs the child and waits for it to halt on the breakpoint:</p>
+
+<blockquote>
+<p>/* Let the child run to the breakpoint and wait for it to<br />
+** reach it<br />
+*/<br />
+ptrace(PTRACE_CONT, child_pid, 0, 0);</p>
+
+<p>wait(&amp;wait_status);<br />
+if (WIFSTOPPED(wait_status)) {<br />
+&#160;&#160;&#160; procmsg(&ldquo;Child got a signal: %s\n&rdquo;, strsignal(WSTOPSIG(wait_status)));<br />
+}<br />
+else {<br />
+&#160;&#160;&#160; perror(&ldquo;wait&rdquo;);<br />
+&#160;&#160;&#160; return;<br />
+}</p>
+
+<p>/* See where the child is now */<br />
+ptrace(PTRACE_GETREGS, child_pid, 0, &amp;regs);<br />
+procmsg(&ldquo;Child stopped at EIP = 0x%08x\n&rdquo;, regs.eip);</p>
+</blockquote>
+
+<p>This prints:</p>
+
+<blockquote>
+<p>Hello,<br />
+[13028] Child got a signal: Trace/breakpoint trap<br />
+[13028] Child stopped at EIP = 0x08048097</p>
+</blockquote>
+
+<p>Note the &ldquo;Hello,&rdquo; that was printed before the breakpoint &#8211; exactly as we planned. Also note where the child stopped &#8211; just after the single-byte trap instruction.</p>
+
+<p>Finally, as was explained earlier, to keep the child running we must do some work. We replace the trap with the original instruction and let the process continue running from it.</p>
+
+<blockquote>
+<p>/* Remove the breakpoint by restoring the previous data<br />
+** at the target address, and unwind the EIP back by 1 to<br />
+** let the CPU execute the original instruction that was<br />
+** there.<br />
+*/<br />
+ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data);<br />
+regs.eip -= 1;<br />
+ptrace(PTRACE_SETREGS, child_pid, 0, &amp;regs);</p>
+
+<p>/* The child can continue running now */<br />
+ptrace(PTRACE_CONT, child_pid, 0, 0);</p>
+</blockquote>
+
+<p>This makes the child print &ldquo;world!&rdquo; and exit, just as planned.</p>
+
+<p>Note that we don&#8217;t restore the breakpoint here. That can be done by executing the original instruction in single-step mode, then placing the trap back and only then do <tt>PTRACE_CONT</tt>. The debug library demonstrated later in the article implements this.</p>
+
+<h5 id="more-on-int-3">More on int 3</h5>
+
+<p>Now is a good time to come back and examine <tt>int 3</tt> and that curious note from Intel&#8217;s manual. Here it is again:</p>
+
+<blockquote>
+<p>This one byte form is valuable because it can be used to replace the first byte of any instruction<br />
+with a breakpoint, including other one byte instructions, without over-writing other code.</p>
+</blockquote>
+
+<p><tt>int</tt> instructions on x86 occupy two bytes &#8211; <tt>0xcd</tt> followed by the interrupt number <a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id12"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id11">6</a></a>. <tt>int 3</tt> could&#8217;ve been encoded as <tt>cd 03</tt>, but there&#8217;s a special single-byte instruction reserved for it &#8211; 0xcc.</p>
+
+<p>Why so? Because this allows us to insert a breakpoint without ever overwriting more than one instruction. And this is important. Consider this sample code:</p>
+
+<blockquote>
+<p>&#160;&#160;&#160; .. some code ..<br />
+&#160;&#160;&#160; jz&#160;&#160;&#160; foo<br />
+&#160;&#160;&#160; dec&#160;&#160; eax<br />
+foo:<br />
+&#160;&#160;&#160; call&#160; bar<br />
+&#160;&#160;&#160; .. some code ..</p>
+</blockquote>
+
+<p>Suppose we want to place a breakpoint on <tt>dec eax</tt>. This happens to be a single-byte instruction (with the opcode <tt>0x48</tt>). Had the replacement breakpoint instruction been longer than 1 byte, we&#8217;d be forced to overwrite part of the next instruction (<tt>call</tt>), which would garble it and probably produce something completely invalid. But what is the branch <tt>jz foo</tt> was taken? Then, without stopping on <tt>dec eax</tt>, the CPU would go straight to execute the invalid instruction after it.</p>
+
+<p>Having a special 1-byte encoding for <tt>int 3</tt> solves this problem. Since 1 byte is the shortest an instruction can get on x86, we guarantee than only the instruction we want to break on gets changed.</p>
+
+<h5 id="encapsulating-some-gory-details">Encapsulating some gory details</h5>
+
+<p>Many of the low-level details shown in code samples of the previous section can be easily encapsulated behind a convenient API. I&#8217;ve done some encapsulation into a small utility library called <tt>debuglib</tt> &#8211; its code is available for download at the end of the article. Here I just want to demonstrate an example of its usage, but with a twist. We&#8217;re going to trace a program written in C.</p>
+
+<h5 id="tracing-a-c-program">Tracing a C program</h5>
+
+<p>So far, for the sake of simplicity, I focused on assembly language targets. It&#8217;s time to go one level up and see how we can trace a program written in C.</p>
+
+<p>It turns out things aren&#8217;t very different &#8211; it&#8217;s just a bit harder to find where to place the breakpoints. Consider this simple program:</p>
+
+<blockquote>
+<p>#include <stdio.h></p>
+
+<p>void do_stuff()<br />
+{<br />
+&#160;&#160;&#160; printf(&ldquo;Hello, &ldquo;);<br />
+}</p>
+
+<p>int main()<br />
+{<br />
+&#160;&#160;&#160; for (int i = 0; i &lt; 4; ++i)<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; do_stuff();<br />
+&#160;&#160;&#160; printf(&ldquo;world!\n&rdquo;);<br />
+&#160;&#160;&#160; return 0;<br />
+}</p>
+</blockquote>
+
+<p>Suppose I want to place a breakpoint at the entrance to <tt>do_stuff</tt>. I&#8217;ll use the old friend <tt>objdump</tt> to disassemble the executable, but there&#8217;s a lot in it. In particular, looking at the <tt>text</tt> section is a bit useless since it contains a lot of C runtime initialization code I&#8217;m currently not interested in. So let&#8217;s just look for <tt>do_stuff</tt> in the dump:</p>
+
+<blockquote>
+<p>080483e4 <do_stuff>:<br />
+80483e4:&#160;&#160;&#160;&#160; 55&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; push&#160;&#160; %ebp<br />
+80483e5:&#160;&#160;&#160;&#160; 89 e5&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; %esp,%ebp<br />
+80483e7:&#160;&#160;&#160;&#160; 83 ec 18&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; sub&#160;&#160;&#160; $0x18,%esp<br />
+80483ea:&#160;&#160;&#160;&#160; c7 04 24 f0 84 04 08&#160;&#160;&#160; movl&#160;&#160; $0x80484f0,(%esp)<br />
+80483f1:&#160;&#160;&#160;&#160; e8 22 ff ff ff&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; call&#160;&#160; 8048318 <a href="mailto:puts@plt">puts@plt</a><br />
+80483f6:&#160;&#160;&#160;&#160; c9&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; leave<br />
+80483f7:&#160;&#160;&#160;&#160; c3&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; ret</p>
+</blockquote>
+
+<p>Alright, so we&#8217;ll place the breakpoint at 0x080483e4, which is the first instruction of <tt>do_stuff</tt>. Moreover, since this function is called in a loop, we want to keep stopping at the breakpoint until the loop ends. We&#8217;re going to use the <tt>debuglib</tt> library to make this simple. Here&#8217;s the complete debugger function:</p>
+
+<blockquote>
+<p>void run_debugger(pid_t child_pid)<br />
+{<br />
+&#160;&#160;&#160; procmsg(&ldquo;debugger started\n&rdquo;);</p>
+
+<p>&#160;&#160;&#160; /* Wait for child to stop on its first instruction */<br />
+&#160;&#160;&#160; wait(0);<br />
+&#160;&#160;&#160; procmsg(&ldquo;child now at EIP = 0x%08x\n&rdquo;, get_child_eip(child_pid));</p>
+
+<p>&#160;&#160;&#160; /* Create breakpoint and run to it*/<br />
+&#160;&#160;&#160; debug_breakpoint* bp = create_breakpoint(child_pid, (void*)0x080483e4);<br />
+&#160;&#160;&#160; procmsg(&ldquo;breakpoint created\n&rdquo;);<br />
+&#160;&#160;&#160; ptrace(PTRACE_CONT, child_pid, 0, 0);<br />
+&#160;&#160;&#160; wait(0);</p>
+
+<p>&#160;&#160;&#160; /* Loop as long as the child didn&#8217;t exit */<br />
+&#160;&#160;&#160; while (1) {<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; /* The child is stopped at a breakpoint here. Resume its<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; ** execution until it either exits or hits the<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; ** breakpoint again.<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; */<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; procmsg(&ldquo;child stopped at breakpoint. EIP = 0x%08X\n&rdquo;, get_child_eip(child_pid));<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; procmsg(&ldquo;resuming\n&rdquo;);<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; int rc = resume_from_breakpoint(child_pid, bp);</p>
+
+<p>&#160;&#160;&#160;&#160;&#160;&#160;&#160; if (rc == 0) {<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; procmsg(&ldquo;child exited\n&rdquo;);<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; break;<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; }<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; else if (rc == 1) {<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; continue;<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; }<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; else {<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; procmsg(&ldquo;unexpected: %d\n&rdquo;, rc);<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; break;<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; }<br />
+&#160;&#160;&#160; }</p>
+
+<p>&#160;&#160;&#160; cleanup_breakpoint(bp);<br />
+}</p>
+</blockquote>
+
+<p>Instead of getting our hands dirty modifying EIP and the target process&#8217;s memory space, we just use<tt>create_breakpoint</tt>, <tt>resume_from_breakpoint</tt> and <tt>cleanup_breakpoint</tt>. Let&#8217;s see what this prints when tracing the simple C code displayed above:</p>
+
+<blockquote>
+<p>$ bp_use_lib traced_c_loop<br />
+[13363] debugger started<br />
+[13364] target started. will run &#8216;traced_c_loop&#8217;<br />
+[13363] child now at EIP = 0x00a37850<br />
+[13363] breakpoint created<br />
+[13363] child stopped at breakpoint. EIP = 0x080483E5<br />
+[13363] resuming<br />
+Hello,<br />
+[13363] child stopped at breakpoint. EIP = 0x080483E5<br />
+[13363] resuming<br />
+Hello,<br />
+[13363] child stopped at breakpoint. EIP = 0x080483E5<br />
+[13363] resuming<br />
+Hello,<br />
+[13363] child stopped at breakpoint. EIP = 0x080483E5<br />
+[13363] resuming<br />
+Hello,<br />
+world!<br />
+[13363] child exited</p>
+</blockquote>
+
+<p>Just as expected!</p>
+
+<h5 id="the-code">The code</h5>
+
+<p><a href="https://github.com/eliben/code-for-blog/tree/master/2011/debuggers_part2_code">Here are</a> the complete source code files for this part. In the archive you&#8217;ll find:</p>
+
+<ul>
+<li>debuglib.h and debuglib.c &#8211; the simple library for encapsulating some of the inner workings of a debugger</li>
+<li>bp_manual.c &#8211; the &ldquo;manual&rdquo; way of setting breakpoints presented first in this article. Uses the<tt>debuglib</tt> library for some boilerplate code.</li>
+<li>bp_use_lib.c &#8211; uses <tt>debuglib</tt> for most of its code, as demonstrated in the second code sample for tracing the loop in a C program.</li>
+</ul>
+
+<h5 id="conclusion-and-next-steps">Conclusion and next steps</h5>
+
+<p>We&#8217;ve covered how breakpoints are implemented in debuggers. While implementation details vary between OSes, when you&#8217;re on x86 it&#8217;s all basically variations on the same theme &#8211; substituting <tt>int 3</tt> for the instruction where we want the process to stop.</p>
+
+<p>That said, I&#8217;m sure some readers, just like me, will be less than excited about specifying raw memory addresses to break on. We&#8217;d like to say &ldquo;break on <tt>do_stuff</tt>&rdquo;, or even &ldquo;break on <em>this</em> line in <tt>do_stuff</tt>&rdquo; and have the debugger do it. In the next article I&#8217;m going to show how it&#8217;s done.</p>
+
+<h5 id="references">References</h5>
+
+<p>I&#8217;ve found the following resources and articles useful in the preparation of this article:</p>
+
+<ul>
+<li><a href="http://www.alexonlinux.com/how-debugger-works">How debugger works</a></li>
+<li><a href="http://www.linuxforums.org/articles/understanding-elf-using-readelf-and-objdump_125.html">Understanding ELF using readelf and objdump</a></li>
+<li><a href="http://mainisusuallyafunction.blogspot.com/2011/01/implementing-breakpoints-on-x86-linux.html">Implementing breakpoints on x86 Linux</a></li>
+<li><a href="http://www.nasm.us/xdoc/2.09.04/html/nasmdoc0.html">NASM manual</a></li>
+<li><a href="http://stackoverflow.com/questions/2187484/elf-binary-entry-point">SO discussion of the ELF entry point</a></li>
+<li><a href="http://news.ycombinator.net/item?id=2131894">This Hacker News discussion</a> of the first part of the series</li>
+<li><a href="http://www.deansys.com/doc/gdbInternals/gdbint_toc.html">GDB Internals</a>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;  <img src="http://eli.thegreenplace.net/images/hline.jpg" alt="" /></ul></li>
+</ul>
+
+<p><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id1"><a href="http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/">1</a></a> On a high-level view this is true. Down in the gory details, many CPUs today execute multiple instructions in parallel, some of them <a href="http://en.wikipedia.org/wiki/Out-of-order_execution">not in their original order</a>.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id2"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id7">2</a></a> The bible in this case being, of course, Intel&#8217;s Architecture software developer&#8217;s manual, volume 2A.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id3"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id8">3</a></a> How can the OS stop a process just like that? The OS registered its own handler for <tt>int 3</tt> with the CPU, that&#8217;s how!</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id4"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id9">4</a></a> Wait, <tt>int</tt> again? Yes! Linux uses <tt>int 0x80</tt> to implement system calls from user processes into the OS kernel. The user places the number of the system call and its arguments into registers and executes<tt>int 0x80</tt>. The CPU then jumps to the appropriate interrupt handler, where the OS registered a procedure that looks at the registers and decides which system call to execute.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id5"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id10">5</a></a> <a href="http://en.wikipedia.org/wiki/Executable_and_Linkable_Format">ELF</a> (Executable and Linkable Format) is the file format used by Linux for object files, shared libraries and executables.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id6"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id11">6</a></a> An observant reader can spot the translation of <tt>int 0x80</tt> into <tt>cd 80</tt> in the dumps listed above.</p>
+    </div>
+
+    
+    
+<div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Johnson</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">2016-08-05</span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+
+    
+    
+
+    <footer class="post-footer">
+      <div class="post-tags">
+          
+          <a href="/tags/c/c&#43;&#43;/">C/C&#43;&#43;</a>
+          
+          <a href="/tags/debug/">Debug</a>
+          
+          <a href="/tags/linux/">Linux</a>
+          
+        </div>
+
+      
+      <nav class="post-nav">
+        
+          <a class="prev" href="/post/how-debuggers-work-part-3-debugging-information/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">How debuggers work: Part 3 – Debugging information</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        
+          <a class="next" href="/post/how-debuggers-work-part-1-basics/">
+            <span class="next-text nav-default">How debuggers work: Part 1 – Basics</span>
+            <span class="prev-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+  
+
+  
+      </div>  
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:johnson9009@163.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://www.linkedin.com/in/qiang-zhang-b8563888" class="iconfont icon-linkedin" title="linkedin"></a>
+      <a href="https://github.com/johnson9009" class="iconfont icon-github" title="github"></a>
+      <a href="https://weibo.com/u/3059419823?refer_flag=1005055010_&amp;is_all=1" class="iconfont icon-weibo" title="weibo"></a>
+  <a href="https://johnson9009.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    &copy; 
+    
+      2017-10-21 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Johnson Zhang</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+<script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+<script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+<script type="text/javascript" src="/dist/even.min.js?v=2.6.4"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+
+
+
+
+</body>
+</html>

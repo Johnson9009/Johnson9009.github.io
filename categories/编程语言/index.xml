@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>编程语言 on 迷失岁月</title>
+    <link>https://johnson9009.github.io/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/</link>
+    <description>Recent content in 编程语言 on 迷失岁月</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 05 Aug 2016 08:04:48 +0000</lastBuildDate>
+    
+	<atom:link href="https://johnson9009.github.io/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>How debuggers work: Part 3 – Debugging information</title>
+      <link>https://johnson9009.github.io/post/how-debuggers-work-part-3-debugging-information/</link>
+      <pubDate>Fri, 05 Aug 2016 08:04:48 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/how-debuggers-work-part-3-debugging-information/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt;&lt;/font&gt; &lt;a title=&#34;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&#34; href=&#34;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&#34;&gt;&lt;strong&gt;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&lt;/strong&gt;&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;p&gt;This is the third part in a series of articles on how debuggers work. Make sure you read &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/&#34;&gt;the first&lt;/a&gt; and &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints/&#34;&gt;the second&lt;/a&gt; parts before this one.&lt;/p&gt;
+
+&lt;h5 id=&#34;in-this-part&#34;&gt;In this part&lt;/h5&gt;
+
+&lt;p&gt;I&amp;#8217;m going to explain how the debugger figures out where to find the C functions and variables in the machine code it wades through, and the data it uses to map between C source code lines and machine language words.&lt;/p&gt;
+
+&lt;h5 id=&#34;debugging-information&#34;&gt;Debugging information&lt;/h5&gt;
+
+&lt;p&gt;Modern compilers do a pretty good job converting your high-level code, with its nicely indented and nested control structures and arbitrarily typed variables into a big pile of bits called machine code, the sole purpose of which is to run as fast as possible on the target CPU. Most lines of C get converted into several machine code instructions. Variables are shoved all over the place &amp;#8211; into the stack, into registers, or completely optimized away. Structures and objects don&amp;#8217;t even &lt;em&gt;exist&lt;/em&gt; in the resulting code &amp;#8211; they&amp;#8217;re merely an abstraction that gets translated to hard-coded offsets into memory buffers.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

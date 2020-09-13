@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>项目管理工具 on 迷失岁月</title>
+    <link>https://johnson9009.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7/</link>
+    <description>Recent content in 项目管理工具 on 迷失岁月</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 26 Jul 2016 15:28:04 +0000</lastBuildDate>
+    
+	<atom:link href="https://johnson9009.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Construct Your Projects Using CMake</title>
+      <link>https://johnson9009.github.io/post/construct-your-projects-using-cmake/</link>
+      <pubDate>Tue, 26 Jul 2016 15:28:04 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/construct-your-projects-using-cmake/</guid>
+      <description>&lt;p&gt;Firstly, I will say thanks to my colleague Jiangli, your suggestion give me more power to practise my English writing. This is my first English post, I will persist in practising my English by this way even though it is hard to me.&lt;/p&gt;
+
+&lt;p&gt;These days, I reorganize my little project using CMake, CMake is cross-platform free and open-source software for managing the build process of software using a compiler-independent method, it is used in conjunction with native build environments such as make, Apple&amp;#8217;s Xcode and Microsoft Visual Studio. It is a good construct tool which can generate configuration file of native build environments such as Makefile, project files automatically.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

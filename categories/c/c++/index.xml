@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>C/C&#43;&#43; on 迷失岁月</title>
+    <link>https://johnson9009.github.io/categories/c/c&#43;&#43;/</link>
+    <description>Recent content in C/C&#43;&#43; on 迷失岁月</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 23 Oct 2017 20:10:52 +0800</lastBuildDate>
+    
+	<atom:link href="https://johnson9009.github.io/categories/c/c++/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>2017 10 23 New Post</title>
+      <link>https://johnson9009.github.io/post/new-post/</link>
+      <pubDate>Mon, 23 Oct 2017 20:10:52 +0800</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/new-post/</guid>
+      <description>&lt;h1 id=&#34;instruction-of-create-a-new-post&#34;&gt;Instruction of Create a New Post&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Enter the root directory of our site.&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Create the post.&lt;/p&gt;
+
+&lt;p&gt;Below command will generate a new post whose type is set to &lt;code&gt;post&lt;/code&gt; automatically. So we can see it on Archives page, the directory name must be &lt;code&gt;post&lt;/code&gt;. The title of this post will be set to &lt;code&gt;post name&lt;/code&gt; automatically and the slug of this post will be &lt;code&gt;post-name&lt;/code&gt;, maybe we need change the slug with front matter of this post. The slug should be a string which is a lower case version of title name and replace all white space with &lt;code&gt;-&lt;/code&gt; and replace any special character with its corresponding English word. For example, the slug of post &lt;code&gt;test#test.md&lt;/code&gt; should be &lt;code&gt;test-sharp-test&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;hugo new post/post-name.md
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Test Travis CI.
+&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Linux Definition of container_of Macro</title>
+      <link>https://johnson9009.github.io/post/linux-definition-of-container_of-macro/</link>
+      <pubDate>Sun, 11 Sep 2016 02:28:05 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/linux-definition-of-container_of-macro/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt; &lt;a href=&#34;http://stackoverflow.com/questions/6083734/rationale-behind-the-container-of-macro-in-linux-list-h&#34; target=&#34;_blank&#34;&gt;&lt;strong&gt;http://stackoverflow.com/questions/6083734/rationale-behind-the-container-of-macro-in-linux-list-h&lt;/strong&gt;&lt;/a&gt;&lt;/font&gt;
+&lt;/p&gt;
+
+&lt;h4 id=&#34;question&#34;&gt;Question&lt;/h4&gt;
+
+&lt;p&gt;In the implementation of linux kernel lists in &lt;code&gt;/include/linux/list.h&lt;/code&gt;, what is the rationale behind the first line (pasted below) of the &lt;code&gt;container_of&lt;/code&gt; macro?&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;const typeof( ((type *)0)-&amp;gt;member ) *__mptr = (ptr);&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In a sample code of mine, I removed this line and changed the definition to&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;#define container_of(ptr, type, member) ({\&lt;br /&gt;
+&amp;#160;&amp;#160;&amp;#160;&amp;#160; (type *)( (char *)ptr &amp;#8211; offsetof(type,member) );})&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;and my code still showed expected results. Is the first line redundant then? Or does it have some hidden trap that I am not aware of?&lt;/p&gt;
+
+&lt;p&gt;The code I found at &lt;a href=&#34;http://kernelnewbies.org/FAQ/LinkedLists&#34; target=&#34;_blank&#34;&gt;Faq/LinkedLists&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;/**&lt;br /&gt;
+* container_of &amp;#8211; cast a member of a structure out to the containing structure&lt;br /&gt;
+* @ptr:&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160; the pointer to the member.&lt;br /&gt;
+* @type:&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160; the type of the container struct this is embedded in.&lt;br /&gt;
+* @member:&amp;#160;&amp;#160;&amp;#160;&amp;#160; the name of the member within the struct.&lt;br /&gt;
+*&lt;br /&gt;
+*/&lt;br /&gt;
+#define container_of(ptr, type, member) ({\&lt;br /&gt;
+&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160; const typeof( ((type *)0)-&amp;gt;member ) *&lt;strong&gt;mptr = (ptr);\&lt;br /&gt;
+&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160; (type *)( (char *)&lt;/strong&gt;mptr &amp;#8211; offsetof(type,member) );})&lt;/p&gt;
+
+&lt;p&gt;#define offsetof(TYPE, MEMBER) ((size_t) &amp;amp;((TYPE *)0)-&amp;gt;MEMBER)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>How debuggers work: Part 3 – Debugging information</title>
+      <link>https://johnson9009.github.io/post/how-debuggers-work-part-3-debugging-information/</link>
+      <pubDate>Fri, 05 Aug 2016 08:04:48 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/how-debuggers-work-part-3-debugging-information/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt;&lt;/font&gt; &lt;a title=&#34;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&#34; href=&#34;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&#34;&gt;&lt;strong&gt;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&lt;/strong&gt;&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;p&gt;This is the third part in a series of articles on how debuggers work. Make sure you read &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/&#34;&gt;the first&lt;/a&gt; and &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints/&#34;&gt;the second&lt;/a&gt; parts before this one.&lt;/p&gt;
+
+&lt;h5 id=&#34;in-this-part&#34;&gt;In this part&lt;/h5&gt;
+
+&lt;p&gt;I&amp;#8217;m going to explain how the debugger figures out where to find the C functions and variables in the machine code it wades through, and the data it uses to map between C source code lines and machine language words.&lt;/p&gt;
+
+&lt;h5 id=&#34;debugging-information&#34;&gt;Debugging information&lt;/h5&gt;
+
+&lt;p&gt;Modern compilers do a pretty good job converting your high-level code, with its nicely indented and nested control structures and arbitrarily typed variables into a big pile of bits called machine code, the sole purpose of which is to run as fast as possible on the target CPU. Most lines of C get converted into several machine code instructions. Variables are shoved all over the place &amp;#8211; into the stack, into registers, or completely optimized away. Structures and objects don&amp;#8217;t even &lt;em&gt;exist&lt;/em&gt; in the resulting code &amp;#8211; they&amp;#8217;re merely an abstraction that gets translated to hard-coded offsets into memory buffers.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>How debuggers work: Part 2 – Breakpoints</title>
+      <link>https://johnson9009.github.io/post/how-debuggers-work-part-2-breakpoints/</link>
+      <pubDate>Fri, 05 Aug 2016 07:54:45 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/how-debuggers-work-part-2-breakpoints/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt; &lt;a title=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints&#34; href=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints&#34;&gt;&lt;strong&gt;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints&lt;/strong&gt;&lt;/a&gt;&lt;/font&gt;
+&lt;/p&gt;
+
+&lt;p&gt;This is the second part in a series of articles on how debuggers work. Make sure you read &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/&#34;&gt;the first part&lt;/a&gt; before this one.&lt;/p&gt;
+
+&lt;h5 id=&#34;in-this-part&#34;&gt;In this part&lt;/h5&gt;
+
+&lt;p&gt;I&amp;#8217;m going to demonstrate how breakpoints are implemented in a debugger. Breakpoints are one of the two main pillars of debugging &amp;#8211; the other being able to inspect values in the debugged process&amp;#8217;s memory. We&amp;#8217;ve already seen a preview of the other pillar in part 1 of the series, but breakpoints still remain mysterious. By the end of this article, they won&amp;#8217;t be.&lt;/p&gt;
+
+&lt;h5 id=&#34;software-interrupts&#34;&gt;Software interrupts&lt;/h5&gt;
+
+&lt;p&gt;To implement breakpoints on the x86 architecture, software interrupts (also known as &amp;ldquo;traps&amp;rdquo;) are used. Before we get deep into the details, I want to explain the concept of interrupts and traps in general.&lt;/p&gt;
+
+&lt;p&gt;A CPU has a single stream of execution, working through instructions one by one &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id7&#34;&gt;&lt;a href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/&#34;&gt;1&lt;/a&gt;&lt;/a&gt;. To handle asynchronous events like IO and hardware timers, CPUs use interrupts. A hardware interrupt is usually a dedicated electrical signal to which a special &amp;ldquo;response circuitry&amp;rdquo; is attached. This circuitry notices an activation of the interrupt and makes the CPU stop its current execution, save its state, and jump to a predefined address where a handler routine for the interrupt is located. When the handler finishes its work, the CPU resumes execution from where it stopped.&lt;/p&gt;
+
+&lt;div align=&#34;right&#34;&gt;
+  
+&lt;/div&gt;
+
+&lt;p&gt;Software interrupts are similar in principle but a bit different in practice. CPUs support special instructions that allow the software to simulate an interrupt. When such an instruction is executed, the CPU treats it like an interrupt &amp;#8211; stops its normal flow of execution, saves its state and jumps to a handler routine. Such &amp;ldquo;traps&amp;rdquo; allow many of the wonders of modern OSes (task scheduling, virtual memory, memory protection, debugging) to be implemented efficiently.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>How debuggers work: Part 1 – Basics</title>
+      <link>https://johnson9009.github.io/post/how-debuggers-work-part-1-basics/</link>
+      <pubDate>Fri, 05 Aug 2016 07:07:40 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/how-debuggers-work-part-1-basics/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt;&lt;/font&gt; &lt;a title=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1&#34; href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1&#34; target=&#34;_blank&#34;&gt;&lt;strong&gt;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1&lt;/strong&gt;&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;p&gt;This is the first part in &lt;a href=&#34;http://eli.thegreenplace.net/pages/code&#34;&gt;a series of articles&lt;/a&gt; on how debuggers work. I&amp;#8217;m still not sure how many articles the series will contain and what topics it will cover, but I&amp;#8217;m going to start with the basics.&lt;/p&gt;
+
+&lt;h5 id=&#34;in-this-part&#34;&gt;In this part&lt;/h5&gt;
+
+&lt;p&gt;I&amp;#8217;m going to present the main building block of a debugger&amp;#8217;s implementation on Linux &amp;#8211; the &lt;tt&gt;ptrace&lt;/tt&gt; system call. All the code in this article is developed on a 32-bit Ubuntu machine. Note that the code is very much platform specific, although porting it to other platforms shouldn&amp;#8217;t be too difficult.&lt;/p&gt;
+
+&lt;h5 id=&#34;motivation&#34;&gt;Motivation&lt;/h5&gt;
+
+&lt;p&gt;To understand where we&amp;#8217;re going, try to imagine what it takes for a debugger to do its work. A debugger can start some process and debug it, or attach itself to an existing process. It can single-step through the code, set breakpoints and run to them, examine variable values and stack traces. Many debuggers have advanced features such as executing expressions and calling functions in the debbugged process&amp;#8217;s address space, and even changing the process&amp;#8217;s code on-the-fly and watching the effects.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Calling Convention “stdcall” VS “cdecl”</title>
+      <link>https://johnson9009.github.io/post/calling-convention-stdcall-vs-cdecl/</link>
+      <pubDate>Sun, 31 Jul 2016 15:09:40 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/calling-convention-stdcall-vs-cdecl/</guid>
+      <description>&lt;p&gt;We know calling convention of all Windows API is stdcall, and the default calling convention of C/C++ is cdecl, but why, why Windows choose the stdcall as API’s calling convention? What&amp;#8217;s the benefit of it?&lt;/p&gt;
+
+&lt;p&gt;I found below answer from internet.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;It was historically added. On x86 &amp;#8211; stdcall is hardly cheaper, than cdecl:&lt;br /&gt;
+stdcall: in function &amp;#8211; ret N (2 bytes)&lt;br /&gt;
+cdecl: in function &amp;#8211; ret (1 byte) + everywhere where this function is caused &amp;#8211; add sp, N (3 bytes).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Before today, I just know the different of stdcall and cdecl, but has never think about the question &amp;ldquo;What&amp;#8217;s the benefit of stdcall?&amp;ldquo;. There are many different calling conventions, consider the method of passing parameters, some calling convention do it through stack such as stdcall and cdecl when some others do it using registers such as fastcall, consider the responsibility for cleaning the arguments from the stack, in stdcall the callee should do that when in cdecl it is caller.&lt;/p&gt;
+
+&lt;div align=&#34;right&#34;&gt;
+  
+&lt;/div&gt;
+
+&lt;p&gt;I get a example from textbook.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Construct Your Projects Using CMake</title>
+      <link>https://johnson9009.github.io/post/construct-your-projects-using-cmake/</link>
+      <pubDate>Tue, 26 Jul 2016 15:28:04 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/construct-your-projects-using-cmake/</guid>
+      <description>&lt;p&gt;Firstly, I will say thanks to my colleague Jiangli, your suggestion give me more power to practise my English writing. This is my first English post, I will persist in practising my English by this way even though it is hard to me.&lt;/p&gt;
+
+&lt;p&gt;These days, I reorganize my little project using CMake, CMake is cross-platform free and open-source software for managing the build process of software using a compiler-independent method, it is used in conjunction with native build environments such as make, Apple&amp;#8217;s Xcode and Microsoft Visual Studio. It is a good construct tool which can generate configuration file of native build environments such as Makefile, project files automatically.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>程序开发与构建</title>
+      <link>https://johnson9009.github.io/post/%E7%A8%8B%E5%BA%8F%E5%BC%80%E5%8F%91%E4%B8%8E%E6%9E%84%E5%BB%BA/</link>
+      <pubDate>Sun, 10 Jul 2016 14:31:32 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/%E7%A8%8B%E5%BA%8F%E5%BC%80%E5%8F%91%E4%B8%8E%E6%9E%84%E5%BB%BA/</guid>
+      <description>&lt;p&gt;对于程序员，开发必然不用多说，但我们常常对构建这一概念了解较少，当下的集成开发环境为我们提供了友好的用户界面，直观的操作方式掩盖了构建相关的许多概念。Linux 开发者大部分都比较熟悉构建，因为常常需要使用 make 这样的构建工具来帮助自己简化编译，链接，安装等过程。&lt;/p&gt;
+
+&lt;p&gt;此文主要以 CMake 来介绍与之相关的一系列概念及相关工具，让我们先来以一个小例子说明一下 CMake，make，gcc 之间的关系及各自的由来。场景是这样的：程序员要开发一个 calculate 程序，所以它设计了一个 main.c，一个计算加减乘除等运算的 math.c 及 math.h。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;最开始程序员只使用 gcc 这一个工具，每次修改完文件后，都是先将 main.c 编译为 main.o，再将 math.c 编译为 math.o，最后再将 main.o 和 math.o 链接在一起生成 calculate。&lt;/li&gt;
+&lt;li&gt;随着开发的进行，频繁的进行上述步骤，已经让程序员忍无可忍，浪费时间又学不到什么，所以他就使用了 make 工具，make 工具可以说是程序员请来的一个助手，程序员现在只需要在配置文件中描述出，用于编译链接的工具是 gcc，main.o 是由 main.c 编译来的，math.o 是由 math.o 编译来的，calculate 程序是由 main.o 和 math.o 链接得到的，即可。每次修改完文件后，只需要执行一下 make，calculate 就生成出来了。&lt;/li&gt;
+&lt;li&gt;随着需求的不断增加，文件也变得越来越多，make 的配置文件越来越难维护，所以程序员开始使用了 CMake 工具，CMake 不是一个 make 工具的替代品，应该说是 make 工具跟上层的一个工具，它会自动生成出来 make 工具所需要的配置文件，之后程序员就可以使用 make 构建程序了。现在程序员不用自己写 make 工具的配置文件了，他只需要写一个 CMake 的配置文件，这个就简单多了，他只需描述出，calculate 程序是由 main.c，math.c，。。。等生成的即可，非常直观简洁。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div align=&#34;right&#34;&gt;
+  
+&lt;/div&gt;
+
+&lt;p&gt;构建这个过程在之前接触的少一些，之前的开发大都是直接在集成开发环境中编辑，编译，调试，测试，没有正规的持续集成测试，自动化测试之类的，所以也就没有这个需求，如果想进行自动化测试，持续集成等这样的事情就必须让构建能够自动化。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>C&#43;&#43;中对象的初始化</title>
+      <link>https://johnson9009.github.io/post/c&#43;&#43;%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96/</link>
+      <pubDate>Sat, 02 Jul 2016 00:50:00 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/c&#43;&#43;%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96/</guid>
+      <description>Most Vexing Parse问题 int a_int_object(5); 这样定义一个int对象对么？ int b_int_object(); 我只想让b_int_object使用默认构造函数进行初始化即可，这样行么？ 若Tool是</description>
+    </item>
+    
+    <item>
+      <title>C语言宏中的#和##号</title>
+      <link>https://johnson9009.github.io/post/c%E8%AF%AD%E8%A8%80%E5%AE%8F%E4%B8%AD%E7%9A%84sharp%E5%92%8Csharpsharp%E5%8F%B7/</link>
+      <pubDate>Thu, 19 Nov 2015 13:52:27 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/c%E8%AF%AD%E8%A8%80%E5%AE%8F%E4%B8%AD%E7%9A%84sharp%E5%92%8Csharpsharp%E5%8F%B7/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;一、一般用法&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;我们使用#把宏参数变为一个字符串，用##把两个宏参数贴合在一起。用法:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-c++&#34;&gt;#include&amp;lt;cstdio&amp;gt;
+#include&amp;lt;climits&amp;gt;
+
+using namespace std;
+
+#define STR(s)      #s
+#define CONS(a,b)   int(a##e##b)
+
+int main() {
+  printf(STR(vck));             // 输出字符串&amp;quot;vck&amp;quot;
+  printf(&amp;quot;%d\n&amp;quot;, CONS(2,3));    // 2e3 输出:2000
+  return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>C/C&#43;&#43;语言双感叹号作用!!</title>
+      <link>https://johnson9009.github.io/post/function-of-double-exclamation-mark-in-c-or-c&#43;&#43;/</link>
+      <pubDate>Wed, 18 Nov 2015 16:38:32 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/function-of-double-exclamation-mark-in-c-or-c&#43;&#43;/</guid>
+      <description>两个!是为了把非0值转换成1,而0值还是0。在C语言中，所以非0值都表示真。 所以!非0值 = 0，而!0 = 1。所以!!非0值 = 1，而!!0 = 0。</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>How debuggers work: Part 3 – Debugging information - 迷失岁月</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Johnson" />
+  <meta name="description" content="Reproduce from http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information This is the third part in a series of articles on how debuggers work. Make sure you read the first and the second parts before this one.
+In this part I&amp;#8217;m going to explain how the debugger figures out where to find the C functions and variables in the machine code it wades through, and the data it uses to map between C source code lines and machine language words.
+Debugging information Modern compilers do a pretty good job converting your high-level code, with its nicely indented and nested control structures and arbitrarily typed variables into a big pile of bits called machine code, the sole purpose of which is to run as fast as possible on the target CPU. Most lines of C get converted into several machine code instructions. Variables are shoved all over the place &amp;#8211; into the stack, into registers, or completely optimized away. Structures and objects don&amp;#8217;t even exist in the resulting code &amp;#8211; they&amp;#8217;re merely an abstraction that gets translated to hard-coded offsets into memory buffers.
+" />
+
+  <meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<link rel="canonical" href="https://johnson9009.github.io/post/how-debuggers-work-part-3-debugging-information/" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" href="/favicon.ico" />
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<link href="/dist/even.min.css?v=2.6.4" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+<meta property="og:title" content="How debuggers work: Part 3 – Debugging information" />
+<meta property="og:description" content="
+  Reproduce from http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information
+
+
+This is the third part in a series of articles on how debuggers work. Make sure you read the first and the second parts before this one.
+
+In this part
+
+I&#8217;m going to explain how the debugger figures out where to find the C functions and variables in the machine code it wades through, and the data it uses to map between C source code lines and machine language words.
+
+Debugging information
+
+Modern compilers do a pretty good job converting your high-level code, with its nicely indented and nested control structures and arbitrarily typed variables into a big pile of bits called machine code, the sole purpose of which is to run as fast as possible on the target CPU. Most lines of C get converted into several machine code instructions. Variables are shoved all over the place &#8211; into the stack, into registers, or completely optimized away. Structures and objects don&#8217;t even exist in the resulting code &#8211; they&#8217;re merely an abstraction that gets translated to hard-coded offsets into memory buffers." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://johnson9009.github.io/post/how-debuggers-work-part-3-debugging-information/" />
+
+
+
+<meta property="article:published_time" content="2016-08-05T08:04:48&#43;00:00"/>
+
+<meta property="article:modified_time" content="2016-08-05T08:04:48&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="How debuggers work: Part 3 – Debugging information">
+<meta itemprop="description" content="
+  Reproduce from http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information
+
+
+This is the third part in a series of articles on how debuggers work. Make sure you read the first and the second parts before this one.
+
+In this part
+
+I&#8217;m going to explain how the debugger figures out where to find the C functions and variables in the machine code it wades through, and the data it uses to map between C source code lines and machine language words.
+
+Debugging information
+
+Modern compilers do a pretty good job converting your high-level code, with its nicely indented and nested control structures and arbitrarily typed variables into a big pile of bits called machine code, the sole purpose of which is to run as fast as possible on the target CPU. Most lines of C get converted into several machine code instructions. Variables are shoved all over the place &#8211; into the stack, into registers, or completely optimized away. Structures and objects don&#8217;t even exist in the resulting code &#8211; they&#8217;re merely an abstraction that gets translated to hard-coded offsets into memory buffers.">
+
+
+<meta itemprop="datePublished" content="2016-08-05T08:04:48&#43;00:00" />
+<meta itemprop="dateModified" content="2016-08-05T08:04:48&#43;00:00" />
+<meta itemprop="wordCount" content="3056">
+
+
+
+<meta itemprop="keywords" content="C/C&#43;&#43;,Debug,Linux," />
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="How debuggers work: Part 3 – Debugging information"/>
+<meta name="twitter:description" content="
+  Reproduce from http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information
+
+
+This is the third part in a series of articles on how debuggers work. Make sure you read the first and the second parts before this one.
+
+In this part
+
+I&#8217;m going to explain how the debugger figures out where to find the C functions and variables in the machine code it wades through, and the data it uses to map between C source code lines and machine language words.
+
+Debugging information
+
+Modern compilers do a pretty good job converting your high-level code, with its nicely indented and nested control structures and arbitrarily typed variables into a big pile of bits called machine code, the sole purpose of which is to run as fast as possible on the target CPU. Most lines of C get converted into several machine code instructions. Variables are shoved all over the place &#8211; into the stack, into registers, or completely optimized away. Structures and objects don&#8217;t even exist in the resulting code &#8211; they&#8217;re merely an abstraction that gets translated to hard-coded offsets into memory buffers."/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">The Time When I Feel Lost ...</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">The Time When I Feel Lost ...</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">How debuggers work: Part 3 – Debugging information</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-08-05 </span>
+        <div class="post-category">
+            <a href="/categories/c/c&#43;&#43;/">C/C&#43;&#43;</a><a href="/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/">编程语言</a><a href="/categories/%E8%BD%AF%E4%BB%B6%E8%B0%83%E8%AF%95/">软件调试</a>
+          </div>
+        
+      </div>
+    </header>
+
+    
+    
+<div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#in-this-part">In this part</a></li>
+<li><a href="#debugging-information">Debugging information</a></li>
+<li><a href="#the-dwarf-in-the-elf">The DWARF in the ELF</a></li>
+<li><a href="#debug-sections-in-elf-files">Debug sections in ELF files</a></li>
+<li><a href="#finding-functions">Finding functions</a></li>
+<li><a href="#finding-variables">Finding variables</a></li>
+<li><a href="#looking-up-line-numbers">Looking up line numbers</a></li>
+<li><a href="#tt-libdwarf-tt-8211-working-with-dwarf-programmatically"><tt>libdwarf</tt> &#8211; Working with DWARF programmatically</a></li>
+<li><a href="#conclusion-and-next-steps">Conclusion and next steps</a></li>
+<li><a href="#references">References</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+
+    
+    <div class="post-content">
+      <p align="right">
+  <font color="#ff0000"><strong>Reproduce from</strong></font> <a title="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information" href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information"><strong>http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information</strong></a>
+</p>
+
+<p>This is the third part in a series of articles on how debuggers work. Make sure you read <a href="http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/">the first</a> and <a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints/">the second</a> parts before this one.</p>
+
+<h5 id="in-this-part">In this part</h5>
+
+<p>I&#8217;m going to explain how the debugger figures out where to find the C functions and variables in the machine code it wades through, and the data it uses to map between C source code lines and machine language words.</p>
+
+<h5 id="debugging-information">Debugging information</h5>
+
+<p>Modern compilers do a pretty good job converting your high-level code, with its nicely indented and nested control structures and arbitrarily typed variables into a big pile of bits called machine code, the sole purpose of which is to run as fast as possible on the target CPU. Most lines of C get converted into several machine code instructions. Variables are shoved all over the place &#8211; into the stack, into registers, or completely optimized away. Structures and objects don&#8217;t even <em>exist</em> in the resulting code &#8211; they&#8217;re merely an abstraction that gets translated to hard-coded offsets into memory buffers.</p>
+
+<p>So how does a debugger know where to stop when you ask it to break at the entry to some function? How does it manage to find what to show you when you ask it for the value of a variable? The answer is &#8211; debugging information.</p>
+
+<div align="right">
+  
+</div>
+
+<p>Debugging information is generated by the compiler together with the machine code. It is a representation of the relationship between the executable program and the original source code. This information is encoded into a pre-defined format and stored alongside the machine code. Many such formats were invented over the years for different platforms and executable files. Since the aim of this article isn&#8217;t to survey the history of these formats, but rather to show how they work, we&#8217;ll have to settle on something. This something is going to be DWARF, which is almost ubiquitously used today as the debugging information format for ELF executables on Linux and other Unix-y platforms.</p>
+
+<h5 id="the-dwarf-in-the-elf">The DWARF in the ELF</h5>
+
+<p><img style="float: none; margin-left: auto; display: block; margin-right: auto" src="http://eli.thegreenplace.net/images/2011/02/dwarf_logo.gif" /></p>
+
+<p>According to <a href="http://en.wikipedia.org/wiki/DWARF">its Wikipedia page</a>, DWARF was designed alongside ELF, although it can in theory be embedded in other object file formats as well <a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id7"><a href="http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/">1</a></a>.</p>
+
+<p>DWARF is a complex format, building on many years of experience with previous formats for various architectures and operating systems. It has to be complex, since it solves a very tricky problem &#8211; presenting debugging information from any high-level language to debuggers, providing support for arbitrary platforms and ABIs. It would take much more than this humble article to explain it fully, and to be honest I don&#8217;t understand all its dark corners well enough to engage in such an endeavor anyway <a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id8"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints/">2</a></a>. In this article I will take a more hands-on approach, showing just enough of DWARF to explain how debugging information works in practical terms.</p>
+
+<h5 id="debug-sections-in-elf-files">Debug sections in ELF files</h5>
+
+<p>First let&#8217;s take a glimpse of where the DWARF info is placed inside ELF files. ELF defines arbitrary sections that may exist in each object file. A <em>section header table</em> defines which sections exist and their names. Different tools treat various sections in special ways &#8211; for example the linker is looking for some sections, the debugger for others.</p>
+
+<p>We&#8217;ll be using an executable built from this C source for our experiments in this article, compiled into <tt>tracedprog2</tt>:</p>
+
+<blockquote>
+<p>#include <stdio.h></p>
+
+<p>void do_stuff(int my_arg)<br />
+{<br />
+&#160;&#160;&#160; int my_local = my_arg + 2;<br />
+&#160;&#160;&#160; int i;</p>
+
+<p>&#160;&#160;&#160; for (i = 0; i &lt; my_local; ++i)<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; printf(&ldquo;i = %d\n&rdquo;, i);<br />
+}</p>
+
+<p>int main()<br />
+{<br />
+&#160;&#160;&#160; do_stuff(2);<br />
+&#160;&#160;&#160; return 0;<br />
+}</p>
+</blockquote>
+
+<p>Dumping the section headers from the ELF executable using <tt>objdump -h</tt> we&#8217;ll notice several sections with names beginning with <tt>.debug_</tt> &#8211; these are the DWARF debugging sections:</p>
+
+<blockquote>
+<p>26 .debug_aranges 00000020&#160; 00000000&#160; 00000000&#160; 00001037<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, READONLY, DEBUGGING<br />
+27 .debug_pubnames 00000028&#160; 00000000&#160; 00000000&#160; 00001057<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, READONLY, DEBUGGING<br />
+28 .debug_info&#160;&#160; 000000cc&#160; 00000000&#160; 00000000&#160; 0000107f<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, READONLY, DEBUGGING<br />
+29 .debug_abbrev 0000008a&#160; 00000000&#160; 00000000&#160; 0000114b<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, READONLY, DEBUGGING<br />
+30 .debug_line&#160;&#160; 0000006b&#160; 00000000&#160; 00000000&#160; 000011d5<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, READONLY, DEBUGGING<br />
+31 .debug_frame&#160; 00000044&#160; 00000000&#160; 00000000&#160; 00001240<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, READONLY, DEBUGGING<br />
+32 .debug_str&#160;&#160;&#160; 000000ae&#160; 00000000&#160; 00000000&#160; 00001284<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, READONLY, DEBUGGING<br />
+33 .debug_loc&#160;&#160;&#160; 00000058&#160; 00000000&#160; 00000000&#160; 00001332<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; CONTENTS, READONLY, DEBUGGING</p>
+</blockquote>
+
+<p>The first number seen for each section here is its size, and the last is the offset where it begins in the ELF file. The debugger uses this information to read the section from the executable.</p>
+
+<p>Now let&#8217;s see a few practical examples of finding useful debug information in DWARF.</p>
+
+<h5 id="finding-functions">Finding functions</h5>
+
+<p>One of the most basic things we want to do when debugging is placing breakpoints at some function, expecting the debugger to break right at its entrance. To be able to perform this feat, the debugger must have some mapping between a function name in the high-level code and the address in the machine code where the instructions for this function begin.</p>
+
+<p>This information can be obtained from DWARF by looking at the <tt>.debug_info</tt> section. Before we go further, a bit of background. The basic descriptive entity in DWARF is called the Debugging Information Entry (DIE). Each DIE has a tag &#8211; its type, and a set of attributes. DIEs are interlinked via sibling and child links, and values of attributes can point at other DIEs.</p>
+
+<p>Let&#8217;s run:</p>
+
+<blockquote>
+<p>objdump &#8211;dwarf=info tracedprog2</p>
+</blockquote>
+
+<p>The output is quite long, and for this example we&#8217;ll just focus on these lines <a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id9"><a href="http://en.wikipedia.org/wiki/DWARF">3</a></a>:</p>
+
+<blockquote>
+<p><1><71>: Abbrev Number: 5 (DW_TAG_subprogram)<br />
+&#160;&#160;&#160; <72>&#160;&#160; DW_AT_external&#160;&#160;&#160; : 1<br />
+&#160;&#160;&#160; <73>&#160;&#160; DW_AT_name&#160;&#160;&#160;&#160;&#160;&#160;&#160; : (&#8230;): do_stuff<br />
+&#160;&#160;&#160; <77>&#160;&#160; DW_AT_decl_file&#160;&#160; : 1<br />
+&#160;&#160;&#160; <78>&#160;&#160; DW_AT_decl_line&#160;&#160; : 4<br />
+&#160;&#160;&#160; <79>&#160;&#160; DW_AT_prototyped&#160; : 1<br />
+&#160;&#160;&#160; <7a>&#160;&#160; DW_AT_low_pc&#160;&#160;&#160;&#160;&#160; : 0x8048604<br />
+&#160;&#160;&#160; <7e>&#160;&#160; DW_AT_high_pc&#160;&#160;&#160;&#160; : 0x804863e<br />
+&#160;&#160;&#160; <82>&#160;&#160; DW_AT_frame_base&#160; : 0x0&#160;&#160;&#160;&#160;&#160; (location list)<br />
+&#160;&#160;&#160; <86>&#160;&#160; DW_AT_sibling&#160;&#160;&#160;&#160; : <0xb3></p>
+
+<p><1><b3>: Abbrev Number: 9 (DW_TAG_subprogram)<br />
+&#160;&#160;&#160; <b4>&#160;&#160; DW_AT_external&#160;&#160;&#160; : 1<br />
+&#160;&#160;&#160; <b5>&#160;&#160; DW_AT_name&#160;&#160;&#160;&#160;&#160;&#160;&#160; : (&#8230;): main<br />
+&#160;&#160;&#160; <b9>&#160;&#160; DW_AT_decl_file&#160;&#160; : 1<br />
+&#160;&#160;&#160; <ba>&#160;&#160; DW_AT_decl_line&#160;&#160; : 14<br />
+&#160;&#160;&#160; <bb>&#160;&#160; DW_AT_type&#160;&#160;&#160;&#160;&#160;&#160;&#160; : <0x4b><br />
+&#160;&#160;&#160; <bf>&#160;&#160; DW_AT_low_pc&#160;&#160;&#160;&#160;&#160; : 0x804863e<br />
+&#160;&#160;&#160; <c3>&#160;&#160; DW_AT_high_pc&#160;&#160;&#160;&#160; : 0x804865a<br />
+&#160;&#160;&#160; <c7>&#160;&#160; DW_AT_frame_base&#160; : 0x2c&#160;&#160;&#160;&#160; (location list)</p>
+</blockquote>
+
+<p>There are two entries (DIEs) tagged <tt>DW_TAG_subprogram</tt>, which is a function in DWARF&#8217;s jargon. Note that there&#8217;s an entry for <tt>do_stuff</tt> and an entry for <tt>main</tt>. There are several interesting attributes, but the one that interests us here is <tt>DW_AT_low_pc</tt>. This is the program-counter (<tt>EIP</tt> in x86) value for the beginning of the function. Note that it&#8217;s <tt>0x8048604</tt> for <tt>do_stuff</tt>. Now let&#8217;s see what this address is in the disassembly of the executable by running <tt>objdump -d</tt>:</p>
+
+<blockquote>
+<p>08048604 <do_stuff>:<br />
+8048604:&#160;&#160;&#160;&#160;&#160;&#160; 55&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; push&#160;&#160; ebp<br />
+8048605:&#160;&#160;&#160;&#160;&#160;&#160; 89 e5&#160;&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; ebp,esp<br />
+8048607:&#160;&#160;&#160;&#160;&#160;&#160; 83 ec 28&#160;&#160;&#160;&#160; sub&#160;&#160;&#160; esp,0x28<br />
+804860a:&#160;&#160;&#160;&#160;&#160;&#160; 8b 45 08&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; eax,DWORD PTR [ebp+0x8]<br />
+804860d:&#160;&#160;&#160;&#160;&#160;&#160; 83 c0 02&#160;&#160;&#160;&#160; add&#160;&#160;&#160; eax,0x2<br />
+8048610:&#160;&#160;&#160;&#160;&#160;&#160; 89 45 f4&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; DWORD PTR [ebp-0xc],eax<br />
+8048613:&#160;&#160;&#160;&#160;&#160;&#160; c7 45 (&#8230;)&#160; mov&#160;&#160;&#160; DWORD PTR [ebp-0x10],0x0<br />
+804861a:&#160;&#160;&#160;&#160;&#160;&#160; eb 18&#160;&#160;&#160;&#160;&#160;&#160;&#160; jmp&#160;&#160;&#160; 8048634 <do_stuff+0x30><br />
+804861c:&#160;&#160;&#160;&#160;&#160;&#160; b8 20 (&#8230;)&#160; mov&#160;&#160;&#160; eax,0x8048720<br />
+8048621:&#160;&#160;&#160;&#160;&#160;&#160; 8b 55 f0&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; edx,DWORD PTR [ebp-0x10]<br />
+8048624:&#160;&#160;&#160;&#160;&#160;&#160; 89 54 24 04&#160; mov&#160;&#160;&#160; DWORD PTR [esp+0x4],edx<br />
+8048628:&#160;&#160;&#160;&#160;&#160;&#160; 89 04 24&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; DWORD PTR [esp],eax<br />
+804862b:&#160;&#160;&#160;&#160;&#160;&#160; e8 04 (&#8230;)&#160; call&#160;&#160; 8048534 <a href="mailto:printf@plt">printf@plt</a><br />
+8048630:&#160;&#160;&#160;&#160;&#160;&#160; 83 45 f0 01&#160; add&#160;&#160;&#160; DWORD PTR [ebp-0x10],0x1<br />
+8048634:&#160;&#160;&#160;&#160;&#160;&#160; 8b 45 f0&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; eax,DWORD PTR [ebp-0x10]<br />
+8048637:&#160;&#160;&#160;&#160;&#160;&#160; 3b 45 f4&#160;&#160;&#160;&#160; cmp&#160;&#160;&#160; eax,DWORD PTR [ebp-0xc]<br />
+804863a:&#160;&#160;&#160;&#160;&#160;&#160; 7c e0&#160;&#160;&#160;&#160;&#160;&#160;&#160; jl&#160;&#160;&#160;&#160; 804861c <do_stuff+0x18><br />
+804863c:&#160;&#160;&#160;&#160;&#160;&#160; c9&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; leave<br />
+804863d:&#160;&#160;&#160;&#160;&#160;&#160; c3&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; ret</p>
+</blockquote>
+
+<p>Indeed, <tt>0x8048604</tt> is the beginning of <tt>do_stuff</tt>, so the debugger can have a mapping between functions and their locations in the executable.</p>
+
+<h5 id="finding-variables">Finding variables</h5>
+
+<p>Suppose that we&#8217;ve indeed stopped at a breakpoint inside <tt>do_stuff</tt>. We want to ask the debugger to show us the value of the <tt>my_local</tt> variable. How does it know where to find it? Turns out this is much trickier than finding functions. Variables can be located in global storage, on the stack, and even in registers. Additionally, variables with the same name can have different values in different lexical scopes. The debugging information has to be able to reflect all these variations, and indeed DWARF does.</p>
+
+<p>I won&#8217;t cover all the possibilities, but as an example I&#8217;ll demonstrate how the debugger can find<tt>my_local</tt> in <tt>do_stuff</tt>. Let&#8217;s start at <tt>.debug_info</tt> and look at the entry for <tt>do_stuff</tt> again, this time also looking at a couple of its sub-entries:</p>
+
+<blockquote>
+<p><1><71>: Abbrev Number: 5 (DW_TAG_subprogram)<br />
+&#160;&#160;&#160; <72>&#160;&#160; DW_AT_external&#160;&#160;&#160; : 1<br />
+&#160;&#160;&#160; <73>&#160;&#160; DW_AT_name&#160;&#160;&#160;&#160;&#160;&#160;&#160; : (&#8230;): do_stuff<br />
+&#160;&#160;&#160; <77>&#160;&#160; DW_AT_decl_file&#160;&#160; : 1<br />
+&#160;&#160;&#160; <78>&#160;&#160; DW_AT_decl_line&#160;&#160; : 4<br />
+&#160;&#160;&#160; <79>&#160;&#160; DW_AT_prototyped&#160; : 1<br />
+&#160;&#160;&#160; <7a>&#160;&#160; DW_AT_low_pc&#160;&#160;&#160;&#160;&#160; : 0x8048604<br />
+&#160;&#160;&#160; <7e>&#160;&#160; DW_AT_high_pc&#160;&#160;&#160;&#160; : 0x804863e<br />
+&#160;&#160;&#160; <82>&#160;&#160; DW_AT_frame_base&#160; : 0x0&#160;&#160;&#160;&#160;&#160; (location list)<br />
+&#160;&#160;&#160; <86>&#160;&#160; DW_AT_sibling&#160;&#160;&#160;&#160; : <0xb3><br />
+<2><8a>: Abbrev Number: 6 (DW_TAG_formal_parameter)<br />
+&#160;&#160;&#160; <8b>&#160;&#160; DW_AT_name&#160;&#160;&#160;&#160;&#160;&#160;&#160; : (&#8230;): my_arg<br />
+&#160;&#160;&#160; <8f>&#160;&#160; DW_AT_decl_file&#160;&#160; : 1<br />
+&#160;&#160;&#160; <90>&#160;&#160; DW_AT_decl_line&#160;&#160; : 4<br />
+&#160;&#160;&#160; <91>&#160;&#160; DW_AT_type&#160;&#160;&#160;&#160;&#160;&#160;&#160; : <0x4b><br />
+&#160;&#160;&#160; <95>&#160;&#160; DW_AT_location&#160;&#160;&#160; : (&#8230;)&#160;&#160;&#160;&#160;&#160;&#160; (DW_OP_fbreg: 0)<br />
+<2><98>: Abbrev Number: 7 (DW_TAG_variable)<br />
+&#160;&#160;&#160; <99>&#160;&#160; DW_AT_name&#160;&#160;&#160;&#160;&#160;&#160;&#160; : (&#8230;): my_local<br />
+&#160;&#160;&#160; <9d>&#160;&#160; DW_AT_decl_file&#160;&#160; : 1<br />
+&#160;&#160;&#160; <9e>&#160;&#160; DW_AT_decl_line&#160;&#160; : 6<br />
+&#160;&#160;&#160; <9f>&#160;&#160; DW_AT_type&#160;&#160;&#160;&#160;&#160;&#160;&#160; : <0x4b><br />
+&#160;&#160;&#160; <a3>&#160;&#160; DW_AT_location&#160;&#160;&#160; : (&#8230;)&#160;&#160;&#160;&#160;&#160; (DW_OP_fbreg: -20)<br />
+<2><a6>: Abbrev Number: 8 (DW_TAG_variable)<br />
+&#160;&#160;&#160; <a7>&#160;&#160; DW_AT_name&#160;&#160;&#160;&#160;&#160;&#160;&#160; : i<br />
+&#160;&#160;&#160; <a9>&#160;&#160; DW_AT_decl_file&#160;&#160; : 1<br />
+&#160;&#160;&#160; <aa>&#160;&#160; DW_AT_decl_line&#160;&#160; : 7<br />
+&#160;&#160;&#160; <ab>&#160;&#160; DW_AT_type&#160;&#160;&#160;&#160;&#160;&#160;&#160; : <0x4b><br />
+&#160;&#160;&#160; <af>&#160;&#160; DW_AT_location&#160;&#160;&#160; : (&#8230;)&#160;&#160;&#160;&#160;&#160; (DW_OP_fbreg: -24)</p>
+</blockquote>
+
+<p>Note the first number inside the angle brackets in each entry. This is the nesting level &#8211; in this example entries with <tt><2></tt> are children of the entry with <tt><1></tt>. So we know that the variable <tt>my_local</tt> (marked by the <tt>DW_TAG_variable</tt> tag) is a child of the <tt>do_stuff</tt> function. The debugger is also interested in a variable&#8217;s type to be able to display it correctly. In the case of <tt>my_local</tt> the type points to another DIE &#8211; <tt><0x4b></tt>. If we look it up in the output of <tt>objdump</tt> we&#8217;ll see it&#8217;s a signed 4-byte integer.</p>
+
+<p>To actually locate the variable in the memory image of the executing process, the debugger will look at the <tt>DW_AT_location</tt> attribute. For <tt>my_local</tt> it says <tt>DW_OP_fbreg: -20</tt>. This means that the variable is stored at offset -20 from the <tt>DW_AT_frame_base</tt> attribute of its containing function &#8211; which is the base of the frame for the function.</p>
+
+<p>The <tt>DW_AT_frame_base</tt> attribute of <tt>do_stuff</tt> has the value <tt>0x0 (location list)</tt>, which means that this value actually has to be looked up in the location list section. Let&#8217;s look at it:</p>
+
+<blockquote>
+<p>$ objdump &#8211;dwarf=loc tracedprog2</p>
+
+<p>tracedprog2:&#160;&#160;&#160;&#160; file format elf32-i386</p>
+
+<p>Contents of the .debug_loc section:</p>
+
+<p>&#160;&#160;&#160; Offset&#160;&#160; Begin&#160;&#160;&#160; End&#160;&#160;&#160;&#160;&#160; Expression<br />
+&#160;&#160;&#160; 00000000 08048604 08048605 (DW_OP_breg4: 4 )<br />
+&#160;&#160;&#160; 00000000 08048605 08048607 (DW_OP_breg4: 8 )<br />
+&#160;&#160;&#160; 00000000 08048607 0804863e (DW_OP_breg5: 8 )<br />
+&#160;&#160;&#160; 00000000 <End of list><br />
+&#160;&#160;&#160; 0000002c 0804863e 0804863f (DW_OP_breg4: 4 )<br />
+&#160;&#160;&#160; 0000002c 0804863f 08048641 (DW_OP_breg4: 8 )<br />
+&#160;&#160;&#160; 0000002c 08048641 0804865a (DW_OP_breg5: 8 )<br />
+&#160;&#160;&#160; 0000002c <End of list></p>
+</blockquote>
+
+<p>The location information we&#8217;re interested in is the first one <a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id10"><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id7">4</a></a>. For each address where the debugger may be, it specifies the current frame base from which offsets to variables are to be computed as an offset from a register. For x86, <tt>bpreg4</tt> refers to <tt>esp</tt> and <tt>bpreg5</tt> refers to <tt>ebp</tt>.</p>
+
+<p>It&#8217;s educational to look at the first several instructions of <tt>do_stuff</tt> again:</p>
+
+<blockquote>
+<p>08048604 <do_stuff>:<br />
+8048604:&#160;&#160;&#160;&#160;&#160;&#160; 55&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; push&#160;&#160; ebp<br />
+8048605:&#160;&#160;&#160;&#160;&#160;&#160; 89 e5&#160;&#160;&#160;&#160;&#160;&#160; mov&#160;&#160;&#160; ebp,esp<br />
+8048607:&#160;&#160;&#160;&#160;&#160;&#160; 83 ec 28&#160;&#160;&#160; sub&#160;&#160;&#160; esp,0x28<br />
+804860a:&#160;&#160;&#160;&#160;&#160;&#160; 8b 45 08&#160;&#160;&#160; mov&#160;&#160;&#160; eax,DWORD PTR [ebp+0x8]<br />
+804860d:&#160;&#160;&#160;&#160;&#160;&#160; 83 c0 02&#160;&#160;&#160; add&#160;&#160;&#160; eax,0x2<br />
+8048610:&#160;&#160;&#160;&#160;&#160;&#160; 89 45 f4&#160;&#160;&#160; mov&#160;&#160;&#160; DWORD PTR [ebp-0xc],eax</p>
+</blockquote>
+
+<p>Note that <tt>ebp</tt> becomes relevant only after the second instruction is executed, and indeed for the first two addresses the base is computed from <tt>esp</tt> in the location information listed above. Once <tt>ebp</tt> is valid, it&#8217;s convenient to compute offsets relative to it because it stays constant while <tt>esp</tt> keeps moving with data being pushed and popped from the stack.</p>
+
+<p>So where does it leave us with <tt>my_local</tt>? We&#8217;re only really interested in its value after the instruction at <tt>0x8048610</tt> (where its value is placed in memory after being computed in <tt>eax</tt>), so the debugger will be using the <tt>DW_OP_breg5: 8</tt> frame base to find it. Now it&#8217;s time to rewind a little and recall that the<tt>DW_AT_location</tt> attribute for <tt>my_local</tt> says <tt>DW_OP_fbreg: -20</tt>. Let&#8217;s do the math: -20 from the frame base, which is <tt>ebp + 8</tt>. We get <tt>ebp - 12</tt>. Now look at the disassembly again and note where the data is moved from <tt>eax</tt> &#8211; indeed, <tt>ebp - 12</tt> is where <tt>my_local</tt> is stored.</p>
+
+<h5 id="looking-up-line-numbers">Looking up line numbers</h5>
+
+<p>When we talked about finding functions in the debugging information, I was cheating a little. When we debug C source code and put a breakpoint in a function, we&#8217;re usually not interested in the first <em>machine code</em> instruction <a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id11"><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id8">5</a></a>. What we&#8217;re <em>really</em> interested in is the first <em>C code</em> line of the function.</p>
+
+<p>This is why DWARF encodes a full mapping between lines in the C source code and machine code addresses in the executable. This information is contained in the <tt>.debug_line</tt> section and can be extracted in a readable form as follows:</p>
+
+<blockquote>
+<p>$ objdump &#8211;dwarf=decodedline tracedprog2</p>
+
+<p>tracedprog2:&#160;&#160;&#160;&#160; file format elf32-i386</p>
+
+<p>Decoded dump of debug contents of section .debug_line:</p>
+
+<p>CU: /home/eliben/eli/eliben-code/debugger/tracedprog2.c:<br />
+File name&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; Line number&#160;&#160;&#160; Starting address<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 5&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x8048604<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 6&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x804860a<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 9&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x8048613<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 10&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x804861c<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 9&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x8048630<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 11&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x804863c<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 15&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x804863e<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 16&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x8048647<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 17&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x8048653<br />
+tracedprog2.c&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 18&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; 0x8048658</p>
+</blockquote>
+
+<p>It shouldn&#8217;t be hard to see the correspondence between this information, the C source code and the disassembly dump. Line number 5 points at the entry point to <tt>do_stuff</tt> &#8211; <tt>0x8040604</tt>. The next line, 6, is where the debugger should really stop when asked to break in <tt>do_stuff</tt>, and it points at <tt>0x804860a</tt> which is just past the prologue of the function. This line information easily allows bi-directional mapping between lines and addresses:</p>
+
+<ul>
+<li>When asked to place a breakpoint at a certain line, the debugger will use it to find which address it should put its trap on (remember our friend <tt>int 3</tt> from the previous article?)</li>
+<li>When an instruction causes a segmentation fault, the debugger will use it to find the source code line on which it happened.</li>
+</ul>
+
+<h5 id="tt-libdwarf-tt-8211-working-with-dwarf-programmatically"><tt>libdwarf</tt> &#8211; Working with DWARF programmatically</h5>
+
+<p>Employing command-line tools to access DWARF information, while useful, isn&#8217;t fully satisfying. As programmers, we&#8217;d like to know how to write actual code that can read the format and extract what we need from it.</p>
+
+<p>Naturally, one approach is to grab the DWARF specification and start hacking away. Now, remember how everyone keeps saying that you should never, ever parse HTML manually but rather use a library? Well, with DWARF it&#8217;s even worse. DWARF is <em>much</em> more complex than HTML. What I&#8217;ve shown here is just the tip of the iceberg, and to make things even harder, most of this information is encoded in a very compact and compressed way in the actual object file <a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id12"><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id9">6</a></a>.</p>
+
+<p>So we&#8217;ll take another road and use a library to work with DWARF. There are two major libraries I&#8217;m aware of (plus a few less complete ones):</p>
+
+<ol>
+<li>BFD (<tt>libbfd</tt>) is used by the <a href="http://www.gnu.org/software/binutils/">GNU binutils</a>, including <tt>objdump</tt> which played a star role in this article, <tt>ld</tt> (the GNU linker) and <tt>as</tt> (the GNU assembler).</li>
+<li><tt>libdwarf</tt> &#8211; which together with its big brother <tt>libelf</tt> are used for the tools on Solaris and FreeBSD operating systems.</li>
+</ol>
+
+<p>I&#8217;m picking <tt>libdwarf</tt> over BFD because it appears less arcane to me and its license is more liberal (<tt>LGPL</tt>vs. <tt>GPL</tt>).</p>
+
+<p>Since <tt>libdwarf</tt> is itself quite complex it requires a lot of code to operate. I&#8217;m not going to show all this code here, but <a href="https://github.com/eliben/code-for-blog/blob/master/2011/dwarf_get_func_addr.c">you can download</a> and run it yourself. To compile this file you&#8217;ll need to have <tt>libelf</tt>and <tt>libdwarf</tt> installed, and pass the <tt>-lelf</tt> and <tt>-ldwarf</tt> flags to the linker.</p>
+
+<p>The demonstrated program takes an executable and prints the names of functions in it, along with their entry points. Here&#8217;s what it produces for the C program we&#8217;ve been playing with in this article:</p>
+
+<blockquote>
+<p>$ dwarf_get_func_addr tracedprog2<br />
+DW_TAG_subprogram: &#8216;do_stuff&#8217;<br />
+low pc&#160; : 0x08048604<br />
+high pc : 0x0804863e<br />
+DW_TAG_subprogram: &#8216;main&#8217;<br />
+low pc&#160; : 0x0804863e<br />
+high pc : 0x0804865a</p>
+</blockquote>
+
+<p>The documentation of <tt>libdwarf</tt> (linked in the References section of this article) is quite good, and with some effort you should have no problem pulling any other information demonstrated in this article from the DWARF sections using it.</p>
+
+<h5 id="conclusion-and-next-steps">Conclusion and next steps</h5>
+
+<p>Debugging information is a simple concept in principle. The implementation details may be intricate, but in the end of the day what matters is that we now know how the debugger finds the information it needs about the original source code from which the executable it&#8217;s tracing was compiled. With this information in hand, the debugger bridges between the world of the user, who thinks in terms of lines of code and data structures, and the world of the executable, which is just a bunch of machine code instructions and data in registers and memory.</p>
+
+<p>This article, with its two predecessors, concludes an introductory series that explains the inner workings of a debugger. Using the information presented here and some programming effort, it should be possible to create a basic but functional debugger for Linux.</p>
+
+<p>As for the next steps, I&#8217;m not sure yet. Maybe I&#8217;ll end the series here, maybe I&#8217;ll present some advanced topics such as backtraces, and perhaps debugging on Windows. Readers can also suggest ideas for future articles in this series or related material. Feel free to use the comments or send me an email.</p>
+
+<h5 id="references">References</h5>
+
+<ul>
+<li><tt>objdump</tt> man page</li>
+<li>Wikipedia pages for <a href="http://en.wikipedia.org/wiki/Executable_and_Linkable_Format">ELF</a> and <a href="http://en.wikipedia.org/wiki/DWARF">DWARF</a>.</li>
+<li><a href="http://dwarfstd.org/">Dwarf Debugging Standard home page</a> &#8211; from here you can obtain the excellent DWARF tutorial by Michael Eager, as well as the DWARF standard itself. You&#8217;ll probably want version 2 since it&#8217;s what <tt>gcc</tt>produces.</li>
+<li><a href="http://reality.sgiweb.org/davea/dwarf.html">libdwarf home page</a> &#8211; the download package includes a comprehensive reference document for the library</li>
+<li><a href="http://sourceware.org/binutils/docs-2.21/bfd/index.html">BFD documentation</a>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;  <img src="http://eli.thegreenplace.net/images/hline.jpg" alt="" /></ul></li>
+</ul>
+
+<p><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id1"><a href="http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/">1</a></a>DWARF is an open standard, published <a href="http://dwarfstd.org/">here</a> by the DWARF standards committee. The DWARF logo displayed above is taken from that website.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id2"><a href="http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints/">2</a></a>At the end of the article I&#8217;ve collected some useful resources that will help you get more familiar with DWARF, if you&#8217;re interested. Particularly, start with the DWARF tutorial.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id3"><a href="http://en.wikipedia.org/wiki/DWARF">3</a></a>Here and in subsequent examples, I&#8217;m placing <tt>(&hellip;)</tt> instead of some longer and un-interesting information for the sake of more convenient formatting.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id4"><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id7">4</a></a>Because the <tt>DW_AT_frame_base</tt> attribute of <tt>do_stuff</tt> contains offset <tt>0x0</tt> into the location list. Note that the same attribute for <tt>main</tt> contains the offset <tt>0x2c</tt> which is the offset for the second set of location expressions.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id5"><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id8">5</a></a>Where the function prologue is usually executed and the local variables aren&#8217;t even valid yet.</p>
+
+<p><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id6"><a href="http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information#id9">6</a></a>Some parts of the information (such as location data and line number data) are encoded as instructions for a specialized virtual machine. Yes, really.</p>
+    </div>
+
+    
+    
+<div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Johnson</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">2016-08-05</span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+
+    
+    
+
+    <footer class="post-footer">
+      <div class="post-tags">
+          
+          <a href="/tags/c/c&#43;&#43;/">C/C&#43;&#43;</a>
+          
+          <a href="/tags/debug/">Debug</a>
+          
+          <a href="/tags/linux/">Linux</a>
+          
+        </div>
+
+      
+      <nav class="post-nav">
+        
+          <a class="prev" href="/post/linux-definition-of-container_of-macro/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Linux Definition of container_of Macro</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        
+          <a class="next" href="/post/how-debuggers-work-part-2-breakpoints/">
+            <span class="next-text nav-default">How debuggers work: Part 2 – Breakpoints</span>
+            <span class="prev-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+  
+
+  
+      </div>  
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:johnson9009@163.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://www.linkedin.com/in/qiang-zhang-b8563888" class="iconfont icon-linkedin" title="linkedin"></a>
+      <a href="https://github.com/johnson9009" class="iconfont icon-github" title="github"></a>
+      <a href="https://weibo.com/u/3059419823?refer_flag=1005055010_&amp;is_all=1" class="iconfont icon-weibo" title="weibo"></a>
+  <a href="https://johnson9009.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    &copy; 
+    
+      2017-10-21 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Johnson Zhang</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+<script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+<script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+<script type="text/javascript" src="/dist/even.min.js?v=2.6.4"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+
+
+
+
+</body>
+</html>

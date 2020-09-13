@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Git on 迷失岁月</title>
+    <link>https://johnson9009.github.io/tags/git/</link>
+    <description>Recent content in Git on 迷失岁月</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 04 Jul 2016 11:57:06 +0000</lastBuildDate>
+    
+	<atom:link href="https://johnson9009.github.io/tags/git/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>带Code Review的优秀Git开发架构</title>
+      <link>https://johnson9009.github.io/post/%E5%B8%A6code-review%E7%9A%84%E4%BC%98%E7%A7%80git%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84/</link>
+      <pubDate>Mon, 04 Jul 2016 11:57:06 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/%E5%B8%A6code-review%E7%9A%84%E4%BC%98%E7%A7%80git%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84/</guid>
+      <description>&lt;p&gt;大部分公司虽然都用 Git 等版本管理系统管理开发过程，但这并不代表就能达到高效可靠的开发效率和质量，开发人员的水平是层次不齐的，除了加大在招聘方面的投入外，code review 是提高代码质量的一大法器。&lt;/p&gt;
+
+&lt;p&gt;错误且糟糕的开发架构特点：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;没有 branch 模型，大家的 commit 都提交在很随意创建的 branch，时间一长就变成一大堆branch，而且谁都知道大部分 branch 都是没用的，但谁也没有十足把握说能把它们删掉。&lt;/li&gt;
+&lt;li&gt;没有 coding style，代码千奇百怪，还谁也说服不了谁。&lt;/li&gt;
+&lt;li&gt;严重两级分化，忙的忙死，闲的闲死，最后经常忙的人中能力强的人跳槽走掉，闲的却依然那么闲，好像走了的那个人原来都是在瞎忙一样（很神奇的现象）。&lt;/li&gt;
+&lt;li&gt;Code review 反复被提起，又反复被遗忘，通常采用同步方式进行即开会，效率不高，而且大部分最后演变成给不懂的人反复无聊的讲解，或讨论其他问题完全忘记了主题。&lt;/li&gt;
+&lt;li&gt;新人不知道该怎么进行每天的工作，稀里糊涂就把 code 提交上去了（其实老人也一样），极其恶心的低级 bug 被隐藏到集成测试时发现，把那些能力强的人气的半死。&lt;/li&gt;
+&lt;li&gt;没有规范成型的单元测试，你的代码今天能跑，明天也许就被别人给搞的不能跑了，直到你下次做这部分功能时才发现，然后 debug，然后奔溃的心里。费了九牛二虎的力气重构了极其可怕的烂代码后，发现程序跑不起来，造成人人都不会去想重构这个事儿，都是插来插去的添加新逻辑，最后造成更烂的代码。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;今天总结的开发架构由几部分组成：成熟优秀的 branch 模型 + Branch 模型的保护 + Phabricator 结合 Git 实现的 Pre-Push 高效 Code Review + 普通开发人员开发流程 + Unit Test + Coding Style + 自动化构建及持续集成。本文所讲架构不适用于开发者分散在全球各地互不相识的开源项目，这样的项目更适合用 GitHub 的 Pull-Request 的那套架构，本文适用于开发人员经常在一起的公司项目的开发。&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Git各概念深入学习</title>
+      <link>https://johnson9009.github.io/post/git%E5%90%84%E6%A6%82%E5%BF%B5%E6%B7%B1%E5%85%A5%E5%AD%A6%E4%B9%A0/</link>
+      <pubDate>Fri, 01 Jul 2016 03:32:16 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/git%E5%90%84%E6%A6%82%E5%BF%B5%E6%B7%B1%E5%85%A5%E5%AD%A6%E4%B9%A0/</guid>
+      <description>&lt;p&gt;平时用TortoiseGit多了，只会用Git来做做简单的版本控制管理，其实这样管理后的项目基本就是野路子，当当地痞还行，上不了战场。最近比较有兴趣，网上的资料结合着命令行Git的练习，对很多概念有了清晰的认识，也找到了一套成熟的，高效，能发挥Git真正实力的用法。&lt;/p&gt;
+
+&lt;p&gt;最常用命令：&lt;/p&gt;
+
+&lt;table cellspacing=&#34;0&#34; cellpadding=&#34;2&#34; width=&#34;590&#34; border=&#34;0&#34;&gt;
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git clone
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      从远程仓库拉代码到本地，其实内部主要是将整个git内部资料拉下来。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git checkout
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      表面上:主要是切换branch，加 –b 指如果当前没有此branch那么先创建它。 &lt;br /&gt;实质上:从某个区域取出某些文件，所以它也可以用于取以前版本的文件。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git status
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      查看当前代码的状态，如果修改了代码就会出现让你add到stage区的提示。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git add
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      添加一个修改到stage区，这之后才能commit。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git commit
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      将stage区的修改提交到当前branch的HEAD区。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git log
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      看commit信息的history
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git fetch
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      将远程仓库的最新代码拉下来但不自动与本地代码merge。将远程仓库的代码看作是另一个branch（只是也叫当前branch的名字），更容易理解fetch和pull的区别。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git pull
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      将远程仓库的最新代码拉下来并merge到当前分支上，当前分支是主动者。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git merge
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      将目标branch merge到当前branch上。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  
+  &lt;tr&gt;
+    &lt;td valign=&#34;top&#34; width=&#34;80&#34;&gt;
+      git push
+    &lt;/td&gt;
+    
+    &lt;td valign=&#34;top&#34; width=&#34;508&#34;&gt;
+      将本地代码推到远程仓库上去。
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

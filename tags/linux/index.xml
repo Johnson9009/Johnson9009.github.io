@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Linux on 迷失岁月</title>
+    <link>https://johnson9009.github.io/tags/linux/</link>
+    <description>Recent content in Linux on 迷失岁月</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 05 Aug 2016 08:04:48 +0000</lastBuildDate>
+    
+	<atom:link href="https://johnson9009.github.io/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>How debuggers work: Part 3 – Debugging information</title>
+      <link>https://johnson9009.github.io/post/how-debuggers-work-part-3-debugging-information/</link>
+      <pubDate>Fri, 05 Aug 2016 08:04:48 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/how-debuggers-work-part-3-debugging-information/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt;&lt;/font&gt; &lt;a title=&#34;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&#34; href=&#34;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&#34;&gt;&lt;strong&gt;http://eli.thegreenplace.net/2011/02/07/how-debuggers-work-part-3-debugging-information&lt;/strong&gt;&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;p&gt;This is the third part in a series of articles on how debuggers work. Make sure you read &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/&#34;&gt;the first&lt;/a&gt; and &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints/&#34;&gt;the second&lt;/a&gt; parts before this one.&lt;/p&gt;
+
+&lt;h5 id=&#34;in-this-part&#34;&gt;In this part&lt;/h5&gt;
+
+&lt;p&gt;I&amp;#8217;m going to explain how the debugger figures out where to find the C functions and variables in the machine code it wades through, and the data it uses to map between C source code lines and machine language words.&lt;/p&gt;
+
+&lt;h5 id=&#34;debugging-information&#34;&gt;Debugging information&lt;/h5&gt;
+
+&lt;p&gt;Modern compilers do a pretty good job converting your high-level code, with its nicely indented and nested control structures and arbitrarily typed variables into a big pile of bits called machine code, the sole purpose of which is to run as fast as possible on the target CPU. Most lines of C get converted into several machine code instructions. Variables are shoved all over the place &amp;#8211; into the stack, into registers, or completely optimized away. Structures and objects don&amp;#8217;t even &lt;em&gt;exist&lt;/em&gt; in the resulting code &amp;#8211; they&amp;#8217;re merely an abstraction that gets translated to hard-coded offsets into memory buffers.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>How debuggers work: Part 2 – Breakpoints</title>
+      <link>https://johnson9009.github.io/post/how-debuggers-work-part-2-breakpoints/</link>
+      <pubDate>Fri, 05 Aug 2016 07:54:45 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/how-debuggers-work-part-2-breakpoints/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt; &lt;a title=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints&#34; href=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints&#34;&gt;&lt;strong&gt;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints&lt;/strong&gt;&lt;/a&gt;&lt;/font&gt;
+&lt;/p&gt;
+
+&lt;p&gt;This is the second part in a series of articles on how debuggers work. Make sure you read &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/&#34;&gt;the first part&lt;/a&gt; before this one.&lt;/p&gt;
+
+&lt;h5 id=&#34;in-this-part&#34;&gt;In this part&lt;/h5&gt;
+
+&lt;p&gt;I&amp;#8217;m going to demonstrate how breakpoints are implemented in a debugger. Breakpoints are one of the two main pillars of debugging &amp;#8211; the other being able to inspect values in the debugged process&amp;#8217;s memory. We&amp;#8217;ve already seen a preview of the other pillar in part 1 of the series, but breakpoints still remain mysterious. By the end of this article, they won&amp;#8217;t be.&lt;/p&gt;
+
+&lt;h5 id=&#34;software-interrupts&#34;&gt;Software interrupts&lt;/h5&gt;
+
+&lt;p&gt;To implement breakpoints on the x86 architecture, software interrupts (also known as &amp;ldquo;traps&amp;rdquo;) are used. Before we get deep into the details, I want to explain the concept of interrupts and traps in general.&lt;/p&gt;
+
+&lt;p&gt;A CPU has a single stream of execution, working through instructions one by one &lt;a href=&#34;http://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints#id7&#34;&gt;&lt;a href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1/&#34;&gt;1&lt;/a&gt;&lt;/a&gt;. To handle asynchronous events like IO and hardware timers, CPUs use interrupts. A hardware interrupt is usually a dedicated electrical signal to which a special &amp;ldquo;response circuitry&amp;rdquo; is attached. This circuitry notices an activation of the interrupt and makes the CPU stop its current execution, save its state, and jump to a predefined address where a handler routine for the interrupt is located. When the handler finishes its work, the CPU resumes execution from where it stopped.&lt;/p&gt;
+
+&lt;div align=&#34;right&#34;&gt;
+  
+&lt;/div&gt;
+
+&lt;p&gt;Software interrupts are similar in principle but a bit different in practice. CPUs support special instructions that allow the software to simulate an interrupt. When such an instruction is executed, the CPU treats it like an interrupt &amp;#8211; stops its normal flow of execution, saves its state and jumps to a handler routine. Such &amp;ldquo;traps&amp;rdquo; allow many of the wonders of modern OSes (task scheduling, virtual memory, memory protection, debugging) to be implemented efficiently.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>How debuggers work: Part 1 – Basics</title>
+      <link>https://johnson9009.github.io/post/how-debuggers-work-part-1-basics/</link>
+      <pubDate>Fri, 05 Aug 2016 07:07:40 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/how-debuggers-work-part-1-basics/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt;&lt;/font&gt; &lt;a title=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1&#34; href=&#34;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1&#34; target=&#34;_blank&#34;&gt;&lt;strong&gt;http://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1&lt;/strong&gt;&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;p&gt;This is the first part in &lt;a href=&#34;http://eli.thegreenplace.net/pages/code&#34;&gt;a series of articles&lt;/a&gt; on how debuggers work. I&amp;#8217;m still not sure how many articles the series will contain and what topics it will cover, but I&amp;#8217;m going to start with the basics.&lt;/p&gt;
+
+&lt;h5 id=&#34;in-this-part&#34;&gt;In this part&lt;/h5&gt;
+
+&lt;p&gt;I&amp;#8217;m going to present the main building block of a debugger&amp;#8217;s implementation on Linux &amp;#8211; the &lt;tt&gt;ptrace&lt;/tt&gt; system call. All the code in this article is developed on a 32-bit Ubuntu machine. Note that the code is very much platform specific, although porting it to other platforms shouldn&amp;#8217;t be too difficult.&lt;/p&gt;
+
+&lt;h5 id=&#34;motivation&#34;&gt;Motivation&lt;/h5&gt;
+
+&lt;p&gt;To understand where we&amp;#8217;re going, try to imagine what it takes for a debugger to do its work. A debugger can start some process and debug it, or attach itself to an existing process. It can single-step through the code, set breakpoints and run to them, examine variable values and stack traces. Many debuggers have advanced features such as executing expressions and calling functions in the debbugged process&amp;#8217;s address space, and even changing the process&amp;#8217;s code on-the-fly and watching the effects.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Cygwin, MinGW, MSYS, GnuWin32, GNU Utilities for Win32 and now MinGW-w64</title>
+      <link>https://johnson9009.github.io/post/cygwin-mingw-msys-gnuwin32-gnu-utilities-for-win32-and-now-mingw-w64/</link>
+      <pubDate>Thu, 07 Jul 2016 08:38:41 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/cygwin-mingw-msys-gnuwin32-gnu-utilities-for-win32-and-now-mingw-w64/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt; &lt;a href=&#34;http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html&#34; target=&#34;_blank&#34;&gt;&lt;strong&gt;http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html&lt;/strong&gt;&lt;/a&gt;&lt;/font&gt;
+&lt;/p&gt;
+
+&lt;h4 id=&#34;introduction&#34;&gt;Introduction&lt;/h4&gt;
+
+&lt;p&gt;GNU on Windows has a sordid past. Not really, but sordid sounds so much more interesting than complicated. So here&amp;#8217;s how I understand it, without any emotion, this is really just a navigational exercise.&lt;/p&gt;
+
+&lt;h4 id=&#34;disclaimer&#34;&gt;Disclaimer&lt;/h4&gt;
+
+&lt;p&gt;What was just said and what I am about to say is entirely opinion and not based on fact. I hope that I do not offend anyone, but I am sure that I inevitably will, as much of my opinion is based on hearsay. In that case I apologize, and please remember that the purpose of this blog is purely selfish; it is a note to myself to remind me of what took me so long to finally understand. So instead of getting angry with me, perhaps post a comment and disabuse me of my still as yet incomplete knowledge.&lt;/p&gt;
+
+&lt;h4 id=&#34;cygwin&#34;&gt;Cygwin&lt;/h4&gt;
+
+&lt;p&gt;In the beginning there was &lt;a href=&#34;http://cygwin.com/&#34;&gt;Cygwin&lt;/a&gt;. Their tagline is &amp;ldquo;Get that Linux feeling &amp;#8211; on Windows!&amp;rdquo; This does a lot to explain exactly what Cygwin is, Linux emulated on Windows. What this means in practice is that Cygwin applications use the cygwin.dll, a common runtime that must be linked to any applications that run on Cygwin, and consequently any applicaton compiled with Cygwin gcc. So essentially, when you use Cygwin you are more or less stuck in Cygwin. True, you could distribute the cygwin.dll with your application, so it would appear to be &lt;em&gt;native&lt;/em&gt;, but it wouldn&amp;#8217;t be truly native. By native here I mean that it runs on one of the windows runtimes like the &lt;a href=&#34;http://en.wikipedia.org/wiki/Microsoft_Windows_library_files&#34;&gt;win32api or msvcrt&lt;/a&gt;. The &lt;a href=&#34;http://www.nano-editor.org/download.php&#34;&gt;Windows binary of GNU nano&lt;/a&gt; is an example of an application compiled using Cygwin that requires cygwin.dll to run. The probable downside of using this layer between the Windows API and your application may be potentially slower speed and some limits in its features.&lt;/p&gt;
+
+&lt;div align=&#34;right&#34;&gt;
+  
+&lt;/div&gt;
+
+&lt;h4 id=&#34;mingw&#34;&gt;MinGW&lt;/h4&gt;
+
+&lt;p&gt;From Cygwin was born &lt;a href=&#34;http://www.mingw.org/&#34;&gt;MinGW&lt;/a&gt;. I don&amp;#8217;t know if this is actually true, but that is what I&amp;#8217;ve heard. Either way it doesn&amp;#8217;t really matter. The essential thing to realize here is this.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

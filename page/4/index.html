@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>迷失岁月</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Johnson Zhang" />
+  <meta name="description" content="迷失岁月" />
+  <meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<link rel="canonical" href="https://johnson9009.github.io/" />
+<link href="https://johnson9009.github.io/index.xml" rel="alternate" type="application/rss+xml" title="迷失岁月" />
+  <link href="https://johnson9009.github.io/index.xml" rel="feed" type="application/rss+xml" title="迷失岁月" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" href="/favicon.ico" />
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<link href="/dist/even.min.css?v=2.6.4" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+<meta property="og:title" content="迷失岁月" />
+<meta property="og:description" content="迷失岁月" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://johnson9009.github.io/" />
+
+
+
+<meta property="og:updated_time" content="2016-07-04T11:57:06&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="迷失岁月">
+<meta itemprop="description" content="迷失岁月">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="迷失岁月"/>
+<meta name="twitter:description" content="迷失岁月"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">The Time When I Feel Lost ...</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">The Time When I Feel Lost ...</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          
+  <section id="posts" class="posts">
+    
+    
+    
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/%E5%B8%A6code-review%E7%9A%84%E4%BC%98%E7%A7%80git%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84/">带Code Review的优秀Git开发架构</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2016-07-04 </span>
+      <div class="post-category">
+          <a href="/categories/git/">Git</a>
+        </div>
+      
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      <p>大部分公司虽然都用 Git 等版本管理系统管理开发过程，但这并不代表就能达到高效可靠的开发效率和质量，开发人员的水平是层次不齐的，除了加大在招聘方面的投入外，code review 是提高代码质量的一大法器。</p>
+
+<p>错误且糟糕的开发架构特点：</p>
+
+<ul>
+<li>没有 branch 模型，大家的 commit 都提交在很随意创建的 branch，时间一长就变成一大堆branch，而且谁都知道大部分 branch 都是没用的，但谁也没有十足把握说能把它们删掉。</li>
+<li>没有 coding style，代码千奇百怪，还谁也说服不了谁。</li>
+<li>严重两级分化，忙的忙死，闲的闲死，最后经常忙的人中能力强的人跳槽走掉，闲的却依然那么闲，好像走了的那个人原来都是在瞎忙一样（很神奇的现象）。</li>
+<li>Code review 反复被提起，又反复被遗忘，通常采用同步方式进行即开会，效率不高，而且大部分最后演变成给不懂的人反复无聊的讲解，或讨论其他问题完全忘记了主题。</li>
+<li>新人不知道该怎么进行每天的工作，稀里糊涂就把 code 提交上去了（其实老人也一样），极其恶心的低级 bug 被隐藏到集成测试时发现，把那些能力强的人气的半死。</li>
+<li>没有规范成型的单元测试，你的代码今天能跑，明天也许就被别人给搞的不能跑了，直到你下次做这部分功能时才发现，然后 debug，然后奔溃的心里。费了九牛二虎的力气重构了极其可怕的烂代码后，发现程序跑不起来，造成人人都不会去想重构这个事儿，都是插来插去的添加新逻辑，最后造成更烂的代码。</li>
+</ul>
+
+<p>今天总结的开发架构由几部分组成：成熟优秀的 branch 模型 + Branch 模型的保护 + Phabricator 结合 Git 实现的 Pre-Push 高效 Code Review + 普通开发人员开发流程 + Unit Test + Coding Style + 自动化构建及持续集成。本文所讲架构不适用于开发者分散在全球各地互不相识的开源项目，这样的项目更适合用 GitHub 的 Pull-Request 的那套架构，本文适用于开发人员经常在一起的公司项目的开发。</p>
+
+<p></p>
+    </div>
+    <div class="read-more">
+      <a href="/post/%E5%B8%A6code-review%E7%9A%84%E4%BC%98%E7%A7%80git%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84/" class="read-more-link">阅读更多</a>
+    </div>
+  </div>
+</article>
+    
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/c&#43;&#43;%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96/">C&#43;&#43;中对象的初始化</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2016-07-02 </span>
+      <div class="post-category">
+          <a href="/categories/c/c&#43;&#43;/">C/C&#43;&#43;</a>
+        </div>
+      
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      Most Vexing Parse问题 int a_int_object(5); 这样定义一个int对象对么？ int b_int_object(); 我只想让b_int_object使用默认构造函数进行初始化即可，这样行么？ 若Tool是
+    </div>
+    <div class="read-more">
+      <a href="/post/c&#43;&#43;%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96/" class="read-more-link">阅读更多</a>
+    </div>
+  </div>
+</article>
+    
+      <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/git%E5%90%84%E6%A6%82%E5%BF%B5%E6%B7%B1%E5%85%A5%E5%AD%A6%E4%B9%A0/">Git各概念深入学习</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2016-07-01 </span>
+      <div class="post-category">
+          <a href="/categories/git/">Git</a>
+        </div>
+      
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      <p>平时用TortoiseGit多了，只会用Git来做做简单的版本控制管理，其实这样管理后的项目基本就是野路子，当当地痞还行，上不了战场。最近比较有兴趣，网上的资料结合着命令行Git的练习，对很多概念有了清晰的认识，也找到了一套成熟的，高效，能发挥Git真正实力的用法。</p>
+
+<p>最常用命令：</p>
+
+<table cellspacing="0" cellpadding="2" width="590" border="0">
+  <tr>
+    <td valign="top" width="80">
+      git clone
+    </td>
+    
+    <td valign="top" width="508">
+      从远程仓库拉代码到本地，其实内部主要是将整个git内部资料拉下来。
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git checkout
+    </td>
+    
+    <td valign="top" width="508">
+      表面上:主要是切换branch，加 –b 指如果当前没有此branch那么先创建它。 <br />实质上:从某个区域取出某些文件，所以它也可以用于取以前版本的文件。
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git status
+    </td>
+    
+    <td valign="top" width="508">
+      查看当前代码的状态，如果修改了代码就会出现让你add到stage区的提示。
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git add
+    </td>
+    
+    <td valign="top" width="508">
+      添加一个修改到stage区，这之后才能commit。
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git commit
+    </td>
+    
+    <td valign="top" width="508">
+      将stage区的修改提交到当前branch的HEAD区。
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git log
+    </td>
+    
+    <td valign="top" width="508">
+      看commit信息的history
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git fetch
+    </td>
+    
+    <td valign="top" width="508">
+      将远程仓库的最新代码拉下来但不自动与本地代码merge。将远程仓库的代码看作是另一个branch（只是也叫当前branch的名字），更容易理解fetch和pull的区别。
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git pull
+    </td>
+    
+    <td valign="top" width="508">
+      将远程仓库的最新代码拉下来并merge到当前分支上，当前分支是主动者。
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git merge
+    </td>
+    
+    <td valign="top" width="508">
+      将目标branch merge到当前branch上。
+    </td>
+  </tr>
+  
+  <tr>
+    <td valign="top" width="80">
+      git push
+    </td>
+    
+    <td valign="top" width="508">
+      将本地代码推到远程仓库上去。
+    </td>
+  </tr>
+</table>
+    </div>
+    <div class="read-more">
+      <a href="/post/git%E5%90%84%E6%A6%82%E5%BF%B5%E6%B7%B1%E5%85%A5%E5%AD%A6%E4%B9%A0/" class="read-more-link">阅读更多</a>
+    </div>
+  </div>
+</article>
+    
+  </section>
+  
+  <nav class="pagination">
+      <a class="prev" href="/page/3/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text">上一页</span>
+      </a>
+    
+      <a class="next" href="/page/5/">
+        <span class="next-text">下一页</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+  </nav>
+
+        </div>
+        
+      </div>  
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:johnson9009@163.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://www.linkedin.com/in/qiang-zhang-b8563888" class="iconfont icon-linkedin" title="linkedin"></a>
+      <a href="https://github.com/johnson9009" class="iconfont icon-github" title="github"></a>
+      <a href="https://weibo.com/u/3059419823?refer_flag=1005055010_&amp;is_all=1" class="iconfont icon-weibo" title="weibo"></a>
+  <a href="https://johnson9009.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    &copy; 
+    
+      2017-10-21 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Johnson Zhang</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+<script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+<script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+<script type="text/javascript" src="/dist/even.min.js?v=2.6.4"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+
+
+
+
+</body>
+</html>

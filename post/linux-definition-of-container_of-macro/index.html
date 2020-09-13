@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Linux Definition of container_of Macro - 迷失岁月</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Johnson" />
+  <meta name="description" content="Reproduce from http://stackoverflow.com/questions/6083734/rationale-behind-the-container-of-macro-in-linux-list-h Question In the implementation of linux kernel lists in /include/linux/list.h, what is the rationale behind the first line (pasted below) of the container_of macro?
+ const typeof( ((type *)0)-&amp;gt;member ) *__mptr = (ptr);
+ In a sample code of mine, I removed this line and changed the definition to
+ #define container_of(ptr, type, member) ({\
+&amp;#160;&amp;#160;&amp;#160;&amp;#160; (type *)( (char *)ptr &amp;#8211; offsetof(type,member) );})
+ and my code still showed expected results. Is the first line redundant then? Or does it have some hidden trap that I am not aware of?
+The code I found at Faq/LinkedLists
+ /**
+* container_of &amp;#8211; cast a member of a structure out to the containing structure
+* @ptr:&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160; the pointer to the member.
+* @type:&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160; the type of the container struct this is embedded in.
+* @member:&amp;#160;&amp;#160;&amp;#160;&amp;#160; the name of the member within the struct.
+*
+*/
+#define container_of(ptr, type, member) ({\
+&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160; const typeof( ((type *)0)-&amp;gt;member ) *mptr = (ptr);\
+&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160;&amp;#160; (type *)( (char *)mptr &amp;#8211; offsetof(type,member) );})
+#define offsetof(TYPE, MEMBER) ((size_t) &amp;amp;((TYPE *)0)-&amp;gt;MEMBER)
+ 
+" />
+
+  <meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<link rel="canonical" href="https://johnson9009.github.io/post/linux-definition-of-container_of-macro/" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" href="/favicon.ico" />
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<link href="/dist/even.min.css?v=2.6.4" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+<meta property="og:title" content="Linux Definition of container_of Macro" />
+<meta property="og:description" content="
+  Reproduce from http://stackoverflow.com/questions/6083734/rationale-behind-the-container-of-macro-in-linux-list-h
+
+
+Question
+
+In the implementation of linux kernel lists in /include/linux/list.h, what is the rationale behind the first line (pasted below) of the container_of macro?
+
+
+const typeof( ((type *)0)-&gt;member ) *__mptr = (ptr);
+
+
+In a sample code of mine, I removed this line and changed the definition to
+
+
+#define container_of(ptr, type, member) ({\
+&#160;&#160;&#160;&#160; (type *)( (char *)ptr &#8211; offsetof(type,member) );})
+
+
+and my code still showed expected results. Is the first line redundant then? Or does it have some hidden trap that I am not aware of?
+
+The code I found at Faq/LinkedLists
+
+
+/**
+* container_of &#8211; cast a member of a structure out to the containing structure
+* @ptr:&#160;&#160;&#160;&#160;&#160;&#160;&#160; the pointer to the member.
+* @type:&#160;&#160;&#160;&#160;&#160;&#160; the type of the container struct this is embedded in.
+* @member:&#160;&#160;&#160;&#160; the name of the member within the struct.
+*
+*/
+#define container_of(ptr, type, member) ({\
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; const typeof( ((type *)0)-&gt;member ) *mptr = (ptr);\
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; (type *)( (char *)mptr &#8211; offsetof(type,member) );})
+
+#define offsetof(TYPE, MEMBER) ((size_t) &amp;((TYPE *)0)-&gt;MEMBER)
+
+
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://johnson9009.github.io/post/linux-definition-of-container_of-macro/" />
+
+
+
+<meta property="article:published_time" content="2016-09-11T02:28:05&#43;00:00"/>
+
+<meta property="article:modified_time" content="2016-09-11T02:28:05&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="Linux Definition of container_of Macro">
+<meta itemprop="description" content="
+  Reproduce from http://stackoverflow.com/questions/6083734/rationale-behind-the-container-of-macro-in-linux-list-h
+
+
+Question
+
+In the implementation of linux kernel lists in /include/linux/list.h, what is the rationale behind the first line (pasted below) of the container_of macro?
+
+
+const typeof( ((type *)0)-&gt;member ) *__mptr = (ptr);
+
+
+In a sample code of mine, I removed this line and changed the definition to
+
+
+#define container_of(ptr, type, member) ({\
+&#160;&#160;&#160;&#160; (type *)( (char *)ptr &#8211; offsetof(type,member) );})
+
+
+and my code still showed expected results. Is the first line redundant then? Or does it have some hidden trap that I am not aware of?
+
+The code I found at Faq/LinkedLists
+
+
+/**
+* container_of &#8211; cast a member of a structure out to the containing structure
+* @ptr:&#160;&#160;&#160;&#160;&#160;&#160;&#160; the pointer to the member.
+* @type:&#160;&#160;&#160;&#160;&#160;&#160; the type of the container struct this is embedded in.
+* @member:&#160;&#160;&#160;&#160; the name of the member within the struct.
+*
+*/
+#define container_of(ptr, type, member) ({\
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; const typeof( ((type *)0)-&gt;member ) *mptr = (ptr);\
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; (type *)( (char *)mptr &#8211; offsetof(type,member) );})
+
+#define offsetof(TYPE, MEMBER) ((size_t) &amp;((TYPE *)0)-&gt;MEMBER)
+
+
+">
+
+
+<meta itemprop="datePublished" content="2016-09-11T02:28:05&#43;00:00" />
+<meta itemprop="dateModified" content="2016-09-11T02:28:05&#43;00:00" />
+<meta itemprop="wordCount" content="223">
+
+
+
+<meta itemprop="keywords" content="C/C&#43;&#43;," />
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Linux Definition of container_of Macro"/>
+<meta name="twitter:description" content="
+  Reproduce from http://stackoverflow.com/questions/6083734/rationale-behind-the-container-of-macro-in-linux-list-h
+
+
+Question
+
+In the implementation of linux kernel lists in /include/linux/list.h, what is the rationale behind the first line (pasted below) of the container_of macro?
+
+
+const typeof( ((type *)0)-&gt;member ) *__mptr = (ptr);
+
+
+In a sample code of mine, I removed this line and changed the definition to
+
+
+#define container_of(ptr, type, member) ({\
+&#160;&#160;&#160;&#160; (type *)( (char *)ptr &#8211; offsetof(type,member) );})
+
+
+and my code still showed expected results. Is the first line redundant then? Or does it have some hidden trap that I am not aware of?
+
+The code I found at Faq/LinkedLists
+
+
+/**
+* container_of &#8211; cast a member of a structure out to the containing structure
+* @ptr:&#160;&#160;&#160;&#160;&#160;&#160;&#160; the pointer to the member.
+* @type:&#160;&#160;&#160;&#160;&#160;&#160; the type of the container struct this is embedded in.
+* @member:&#160;&#160;&#160;&#160; the name of the member within the struct.
+*
+*/
+#define container_of(ptr, type, member) ({\
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; const typeof( ((type *)0)-&gt;member ) *mptr = (ptr);\
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; (type *)( (char *)mptr &#8211; offsetof(type,member) );})
+
+#define offsetof(TYPE, MEMBER) ((size_t) &amp;((TYPE *)0)-&gt;MEMBER)
+
+
+"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">The Time When I Feel Lost ...</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">The Time When I Feel Lost ...</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Linux Definition of container_of Macro</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-09-11 </span>
+        <div class="post-category">
+            <a href="/categories/c/c&#43;&#43;/">C/C&#43;&#43;</a>
+          </div>
+        
+      </div>
+    </header>
+
+    
+    
+<div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#question">Question</a></li>
+<li><a href="#answer">Answer</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+
+    
+    <div class="post-content">
+      <p align="right">
+  <font color="#ff0000"><strong>Reproduce from</strong> <a href="http://stackoverflow.com/questions/6083734/rationale-behind-the-container-of-macro-in-linux-list-h" target="_blank"><strong>http://stackoverflow.com/questions/6083734/rationale-behind-the-container-of-macro-in-linux-list-h</strong></a></font>
+</p>
+
+<h4 id="question">Question</h4>
+
+<p>In the implementation of linux kernel lists in <code>/include/linux/list.h</code>, what is the rationale behind the first line (pasted below) of the <code>container_of</code> macro?</p>
+
+<blockquote>
+<p>const typeof( ((type *)0)-&gt;member ) *__mptr = (ptr);</p>
+</blockquote>
+
+<p>In a sample code of mine, I removed this line and changed the definition to</p>
+
+<blockquote>
+<p>#define container_of(ptr, type, member) ({\<br />
+&#160;&#160;&#160;&#160; (type *)( (char *)ptr &#8211; offsetof(type,member) );})</p>
+</blockquote>
+
+<p>and my code still showed expected results. Is the first line redundant then? Or does it have some hidden trap that I am not aware of?</p>
+
+<p>The code I found at <a href="http://kernelnewbies.org/FAQ/LinkedLists" target="_blank">Faq/LinkedLists</a></p>
+
+<blockquote>
+<p>/**<br />
+* container_of &#8211; cast a member of a structure out to the containing structure<br />
+* @ptr:&#160;&#160;&#160;&#160;&#160;&#160;&#160; the pointer to the member.<br />
+* @type:&#160;&#160;&#160;&#160;&#160;&#160; the type of the container struct this is embedded in.<br />
+* @member:&#160;&#160;&#160;&#160; the name of the member within the struct.<br />
+*<br />
+*/<br />
+#define container_of(ptr, type, member) ({\<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; const typeof( ((type *)0)-&gt;member ) *<strong>mptr = (ptr);\<br />
+&#160;&#160;&#160;&#160;&#160;&#160;&#160; (type *)( (char *)</strong>mptr &#8211; offsetof(type,member) );})</p>
+
+<p>#define offsetof(TYPE, MEMBER) ((size_t) &amp;((TYPE *)0)-&gt;MEMBER)</p>
+</blockquote>
+
+<p></p>
+
+<h4 id="answer">Answer</h4>
+
+<p>It adds some type checking. With your version, this compiles fine (without warning):</p>
+
+<blockquote>
+<p>struct foo { int bar; };<br />
+&#8230;.<br />
+float a;<br />
+struct foo *var = container_of(&amp;a, foo, bar);</p>
+</blockquote>
+
+<p>With the kernel version, the compiler reports:</p>
+
+<blockquote>
+<p>warning: initialization from incompatible pointer type</p>
+</blockquote>
+
+<p>Good explanation of how the macro works: <a href="http://www.kroah.com/log/linux/container_of.html">container_of</a> by Greg Kroah-Hartman.</p>
+    </div>
+
+    
+    
+<div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Johnson</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">2016-09-11</span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+
+    
+    
+
+    <footer class="post-footer">
+      <div class="post-tags">
+          
+          <a href="/tags/c/c&#43;&#43;/">C/C&#43;&#43;</a>
+          
+        </div>
+
+      
+      <nav class="post-nav">
+        
+          <a class="prev" href="/post/new-post/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">2017 10 23 New Post</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        
+          <a class="next" href="/post/how-debuggers-work-part-3-debugging-information/">
+            <span class="next-text nav-default">How debuggers work: Part 3 – Debugging information</span>
+            <span class="prev-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+  
+
+  
+      </div>  
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:johnson9009@163.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://www.linkedin.com/in/qiang-zhang-b8563888" class="iconfont icon-linkedin" title="linkedin"></a>
+      <a href="https://github.com/johnson9009" class="iconfont icon-github" title="github"></a>
+      <a href="https://weibo.com/u/3059419823?refer_flag=1005055010_&amp;is_all=1" class="iconfont icon-weibo" title="weibo"></a>
+  <a href="https://johnson9009.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    &copy; 
+    
+      2017-10-21 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Johnson Zhang</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+<script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+<script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+<script type="text/javascript" src="/dist/even.min.js?v=2.6.4"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+
+
+
+
+</body>
+</html>

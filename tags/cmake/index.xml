@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Cmake on 迷失岁月</title>
+    <link>https://johnson9009.github.io/tags/cmake/</link>
+    <description>Recent content in Cmake on 迷失岁月</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 26 Jul 2016 15:28:04 +0000</lastBuildDate>
+    
+	<atom:link href="https://johnson9009.github.io/tags/cmake/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Construct Your Projects Using CMake</title>
+      <link>https://johnson9009.github.io/post/construct-your-projects-using-cmake/</link>
+      <pubDate>Tue, 26 Jul 2016 15:28:04 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/construct-your-projects-using-cmake/</guid>
+      <description>&lt;p&gt;Firstly, I will say thanks to my colleague Jiangli, your suggestion give me more power to practise my English writing. This is my first English post, I will persist in practising my English by this way even though it is hard to me.&lt;/p&gt;
+
+&lt;p&gt;These days, I reorganize my little project using CMake, CMake is cross-platform free and open-source software for managing the build process of software using a compiler-independent method, it is used in conjunction with native build environments such as make, Apple&amp;#8217;s Xcode and Microsoft Visual Studio. It is a good construct tool which can generate configuration file of native build environments such as Makefile, project files automatically.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>程序开发与构建</title>
+      <link>https://johnson9009.github.io/post/%E7%A8%8B%E5%BA%8F%E5%BC%80%E5%8F%91%E4%B8%8E%E6%9E%84%E5%BB%BA/</link>
+      <pubDate>Sun, 10 Jul 2016 14:31:32 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/%E7%A8%8B%E5%BA%8F%E5%BC%80%E5%8F%91%E4%B8%8E%E6%9E%84%E5%BB%BA/</guid>
+      <description>&lt;p&gt;对于程序员，开发必然不用多说，但我们常常对构建这一概念了解较少，当下的集成开发环境为我们提供了友好的用户界面，直观的操作方式掩盖了构建相关的许多概念。Linux 开发者大部分都比较熟悉构建，因为常常需要使用 make 这样的构建工具来帮助自己简化编译，链接，安装等过程。&lt;/p&gt;
+
+&lt;p&gt;此文主要以 CMake 来介绍与之相关的一系列概念及相关工具，让我们先来以一个小例子说明一下 CMake，make，gcc 之间的关系及各自的由来。场景是这样的：程序员要开发一个 calculate 程序，所以它设计了一个 main.c，一个计算加减乘除等运算的 math.c 及 math.h。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;最开始程序员只使用 gcc 这一个工具，每次修改完文件后，都是先将 main.c 编译为 main.o，再将 math.c 编译为 math.o，最后再将 main.o 和 math.o 链接在一起生成 calculate。&lt;/li&gt;
+&lt;li&gt;随着开发的进行，频繁的进行上述步骤，已经让程序员忍无可忍，浪费时间又学不到什么，所以他就使用了 make 工具，make 工具可以说是程序员请来的一个助手，程序员现在只需要在配置文件中描述出，用于编译链接的工具是 gcc，main.o 是由 main.c 编译来的，math.o 是由 math.o 编译来的，calculate 程序是由 main.o 和 math.o 链接得到的，即可。每次修改完文件后，只需要执行一下 make，calculate 就生成出来了。&lt;/li&gt;
+&lt;li&gt;随着需求的不断增加，文件也变得越来越多，make 的配置文件越来越难维护，所以程序员开始使用了 CMake 工具，CMake 不是一个 make 工具的替代品，应该说是 make 工具跟上层的一个工具，它会自动生成出来 make 工具所需要的配置文件，之后程序员就可以使用 make 构建程序了。现在程序员不用自己写 make 工具的配置文件了，他只需要写一个 CMake 的配置文件，这个就简单多了，他只需描述出，calculate 程序是由 main.c，math.c，。。。等生成的即可，非常直观简洁。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div align=&#34;right&#34;&gt;
+  
+&lt;/div&gt;
+
+&lt;p&gt;构建这个过程在之前接触的少一些，之前的开发大都是直接在集成开发环境中编辑，编译，调试，测试，没有正规的持续集成测试，自动化测试之类的，所以也就没有这个需求，如果想进行自动化测试，持续集成等这样的事情就必须让构建能够自动化。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

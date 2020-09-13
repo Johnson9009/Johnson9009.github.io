@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>十月十七（-4~1℃）PM2.5: 307 - 迷失岁月</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Johnson" />
+  <meta name="description" content="今天起了个大早去参加了第三届开源操作系统年度技术会议，我最感兴趣的是一个分主题，GPU与虚拟化，先是Intel的一个技术专家对这一主题进行简介并介绍Intel做的工作，后是华为的一个工程师讲华为在这方面做的相关产品，最精彩的我觉得是下午北大青年教授讲的GPU优化。
+研究生被导师的人品恶心到的那段时间，无心做事但又不想浪费时间，于是开始了解云计算相关的技术，经过一段时间的探索，对云计算中的各个角色及其由来都理解的特别透彻，同时我也发现了国内学术界的轻浮与虚伪，好多教授根本对云计算屁都不懂，却夸夸其谈，下面的人又是傻逼一样的随声附和。
+GPU虚拟化没有伴随云计算的出现而出现，是因为在起初的云计算应用场景中根本没有GPU的需求，云计算源于亚马逊做的AWS，它要解决的问题是能自动的弹性扩展网站的服务器能力，所以根本就没有什么GPU的事儿。
+但随着云计算的不断发展，它的概念也在逐步的丰富，尤其企业内部的私有云，人们不再局限于用它做一个可伸缩的服务器，人们期望利用它天生的很多优点做其他的事情。比如，一个企业想在机房部署一套私有云，然后员工的计算机都缩小成一个小的盒子和显示器，员工办公的时候开启电脑其实是登录到机房的私有云中的一台虚拟机中，这样所有的操作及数据都在机房，对安全及统一维护都有非常大的好处。
+ 逐渐的有一些设计公司也采用这种结构，但是问题来了，设计行业中的好多软件需要大量的GPU操作，所以好多软件在虚拟机中根本运行不起来，比如做模型的3Dmax或者maya，这才引发了GPU虚拟化的产生。
+" />
+
+  <meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<link rel="canonical" href="https://johnson9009.github.io/post/%E5%8D%81%E6%9C%88%E5%8D%81%E4%B8%83-4-1%E5%BA%A6pm2.5-307/" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" href="/favicon.ico" />
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<link href="/dist/even.min.css?v=2.6.4" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+<meta property="og:title" content="十月十七（-4~1℃）PM2.5: 307" />
+<meta property="og:description" content="今天起了个大早去参加了第三届开源操作系统年度技术会议，我最感兴趣的是一个分主题，GPU与虚拟化，先是Intel的一个技术专家对这一主题进行简介并介绍Intel做的工作，后是华为的一个工程师讲华为在这方面做的相关产品，最精彩的我觉得是下午北大青年教授讲的GPU优化。
+
+研究生被导师的人品恶心到的那段时间，无心做事但又不想浪费时间，于是开始了解云计算相关的技术，经过一段时间的探索，对云计算中的各个角色及其由来都理解的特别透彻，同时我也发现了国内学术界的轻浮与虚伪，好多教授根本对云计算屁都不懂，却夸夸其谈，下面的人又是傻逼一样的随声附和。
+
+GPU虚拟化没有伴随云计算的出现而出现，是因为在起初的云计算应用场景中根本没有GPU的需求，云计算源于亚马逊做的AWS，它要解决的问题是能自动的弹性扩展网站的服务器能力，所以根本就没有什么GPU的事儿。
+
+但随着云计算的不断发展，它的概念也在逐步的丰富，尤其企业内部的私有云，人们不再局限于用它做一个可伸缩的服务器，人们期望利用它天生的很多优点做其他的事情。比如，一个企业想在机房部署一套私有云，然后员工的计算机都缩小成一个小的盒子和显示器，员工办公的时候开启电脑其实是登录到机房的私有云中的一台虚拟机中，这样所有的操作及数据都在机房，对安全及统一维护都有非常大的好处。
+
+
+  
+
+
+逐渐的有一些设计公司也采用这种结构，但是问题来了，设计行业中的好多软件需要大量的GPU操作，所以好多软件在虚拟机中根本运行不起来，比如做模型的3Dmax或者maya，这才引发了GPU虚拟化的产生。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://johnson9009.github.io/post/%E5%8D%81%E6%9C%88%E5%8D%81%E4%B8%83-4-1%E5%BA%A6pm2.5-307/" />
+
+
+
+<meta property="article:published_time" content="2015-11-28T16:22:01&#43;00:00"/>
+
+<meta property="article:modified_time" content="2015-11-28T16:22:01&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="十月十七（-4~1℃）PM2.5: 307">
+<meta itemprop="description" content="今天起了个大早去参加了第三届开源操作系统年度技术会议，我最感兴趣的是一个分主题，GPU与虚拟化，先是Intel的一个技术专家对这一主题进行简介并介绍Intel做的工作，后是华为的一个工程师讲华为在这方面做的相关产品，最精彩的我觉得是下午北大青年教授讲的GPU优化。
+
+研究生被导师的人品恶心到的那段时间，无心做事但又不想浪费时间，于是开始了解云计算相关的技术，经过一段时间的探索，对云计算中的各个角色及其由来都理解的特别透彻，同时我也发现了国内学术界的轻浮与虚伪，好多教授根本对云计算屁都不懂，却夸夸其谈，下面的人又是傻逼一样的随声附和。
+
+GPU虚拟化没有伴随云计算的出现而出现，是因为在起初的云计算应用场景中根本没有GPU的需求，云计算源于亚马逊做的AWS，它要解决的问题是能自动的弹性扩展网站的服务器能力，所以根本就没有什么GPU的事儿。
+
+但随着云计算的不断发展，它的概念也在逐步的丰富，尤其企业内部的私有云，人们不再局限于用它做一个可伸缩的服务器，人们期望利用它天生的很多优点做其他的事情。比如，一个企业想在机房部署一套私有云，然后员工的计算机都缩小成一个小的盒子和显示器，员工办公的时候开启电脑其实是登录到机房的私有云中的一台虚拟机中，这样所有的操作及数据都在机房，对安全及统一维护都有非常大的好处。
+
+
+  
+
+
+逐渐的有一些设计公司也采用这种结构，但是问题来了，设计行业中的好多软件需要大量的GPU操作，所以好多软件在虚拟机中根本运行不起来，比如做模型的3Dmax或者maya，这才引发了GPU虚拟化的产生。">
+
+
+<meta itemprop="datePublished" content="2015-11-28T16:22:01&#43;00:00" />
+<meta itemprop="dateModified" content="2015-11-28T16:22:01&#43;00:00" />
+<meta itemprop="wordCount" content="2029">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="十月十七（-4~1℃）PM2.5: 307"/>
+<meta name="twitter:description" content="今天起了个大早去参加了第三届开源操作系统年度技术会议，我最感兴趣的是一个分主题，GPU与虚拟化，先是Intel的一个技术专家对这一主题进行简介并介绍Intel做的工作，后是华为的一个工程师讲华为在这方面做的相关产品，最精彩的我觉得是下午北大青年教授讲的GPU优化。
+
+研究生被导师的人品恶心到的那段时间，无心做事但又不想浪费时间，于是开始了解云计算相关的技术，经过一段时间的探索，对云计算中的各个角色及其由来都理解的特别透彻，同时我也发现了国内学术界的轻浮与虚伪，好多教授根本对云计算屁都不懂，却夸夸其谈，下面的人又是傻逼一样的随声附和。
+
+GPU虚拟化没有伴随云计算的出现而出现，是因为在起初的云计算应用场景中根本没有GPU的需求，云计算源于亚马逊做的AWS，它要解决的问题是能自动的弹性扩展网站的服务器能力，所以根本就没有什么GPU的事儿。
+
+但随着云计算的不断发展，它的概念也在逐步的丰富，尤其企业内部的私有云，人们不再局限于用它做一个可伸缩的服务器，人们期望利用它天生的很多优点做其他的事情。比如，一个企业想在机房部署一套私有云，然后员工的计算机都缩小成一个小的盒子和显示器，员工办公的时候开启电脑其实是登录到机房的私有云中的一台虚拟机中，这样所有的操作及数据都在机房，对安全及统一维护都有非常大的好处。
+
+
+  
+
+
+逐渐的有一些设计公司也采用这种结构，但是问题来了，设计行业中的好多软件需要大量的GPU操作，所以好多软件在虚拟机中根本运行不起来，比如做模型的3Dmax或者maya，这才引发了GPU虚拟化的产生。"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">The Time When I Feel Lost ...</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">The Time When I Feel Lost ...</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">十月十七（-4~1℃）PM2.5: 307</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2015-11-28 </span>
+        <div class="post-category">
+            <a href="/categories/%E6%97%A5%E8%AE%B0/">日记</a>
+          </div>
+        
+      </div>
+    </header>
+
+    
+    
+<div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+      
+  </div>
+</div>
+
+    
+    <div class="post-content">
+      <p>今天起了个大早去参加了第三届开源操作系统年度技术会议，我最感兴趣的是一个分主题，GPU与虚拟化，先是Intel的一个技术专家对这一主题进行简介并介绍Intel做的工作，后是华为的一个工程师讲华为在这方面做的相关产品，最精彩的我觉得是下午北大青年教授讲的GPU优化。</p>
+
+<p>研究生被导师的人品恶心到的那段时间，无心做事但又不想浪费时间，于是开始了解云计算相关的技术，经过一段时间的探索，对云计算中的各个角色及其由来都理解的特别透彻，同时我也发现了国内学术界的轻浮与虚伪，好多教授根本对云计算屁都不懂，却夸夸其谈，下面的人又是傻逼一样的随声附和。</p>
+
+<p>GPU虚拟化没有伴随云计算的出现而出现，是因为在起初的云计算应用场景中根本没有GPU的需求，云计算源于亚马逊做的AWS，它要解决的问题是能自动的弹性扩展网站的服务器能力，所以根本就没有什么GPU的事儿。</p>
+
+<p>但随着云计算的不断发展，它的概念也在逐步的丰富，尤其企业内部的私有云，人们不再局限于用它做一个可伸缩的服务器，人们期望利用它天生的很多优点做其他的事情。比如，一个企业想在机房部署一套私有云，然后员工的计算机都缩小成一个小的盒子和显示器，员工办公的时候开启电脑其实是登录到机房的私有云中的一台虚拟机中，这样所有的操作及数据都在机房，对安全及统一维护都有非常大的好处。</p>
+
+<div align="right">
+  
+</div>
+
+<p>逐渐的有一些设计公司也采用这种结构，但是问题来了，设计行业中的好多软件需要大量的GPU操作，所以好多软件在虚拟机中根本运行不起来，比如做模型的3Dmax或者maya，这才引发了GPU虚拟化的产生。</p>
+
+<p>北大青年教授一看就是从国外回来的，判断依据很明显，他做的研究比企业超前并取得成果，发表的论文都是真材实料，有较高的引用价值。研究的事儿——有用，研究的方法——正确，研究的成果——显著，研究成果的应用到实际中——成熟可靠，国内的这堆扯淡教授成天就是没得干，所以得研究点啥，啥好忽悠钱，研究啥，什么方向，什么方法，好多论文写出来估计下辈子都没有人看一下，更别说引用了。</p>
+
+<p>听完讲座还比较早，本来要走了，路过国产操作系统产业化的会议室，看到有潘爱民教授的演讲就想着去听听吧，结果可是让我“大开眼界”了，让我切切实实的感受到了什么叫官商勾结，让我明白为什么国家拨那么多钱搞国产操作系统，却一事无成。</p>
+
+<p>一开始是一个国防科技大学的人在讲麒麟，就是一顿吹牛逼，一股的解放军的感觉，讲的是慷慨激昂、义正言辞，但明眼人一看十个点有九个都是站不住脚的，而且几乎每讲一句都要提一下一位官员模样的人，并殷勤的向那个人点头哈腰，那个人也满足的向他点点头，傻逼都能看得出来他们存在着官商勾结的利益共同体，最近国家又拨了60个亿的专款，想想如此巨额财富，不产生这样的官商勾结才怪。</p>
+
+<p>最戏剧性的还在后面，还有一个公司也在做国产操作系统，也讲了一个PPT，讲完之后就找机会去和那么官员攀谈，估计是期望推销他们的产品，结果在走的时候，那个官员指着那么人的鼻子怒气冲冲的说了好几次“在江湖上。。。（具体没听清）”。很明显这个官员根本就不关心那个操作系统更好，他只关心自己的利益，要是有人出来企图阻碍他利益的获取，他才不会答应。潘爱民教授显然也是根本就懒得和这帮傻逼多说，只是简简单单的介绍了一下移动操作系统中的几个安全问题便草草走人。</p>
+
+<p>在我看来，其实我国操作系统的研究方针其实很简单，分两点，一就是基于云计算的操作系统，二就是嵌入式操作系统。不管军队还是政府直接使用云计算做私有云，特殊用途的话可以用现有的国产Linux便可以，其他的设备上都直接使用嵌入式操作系统。基于云计算的应用设计操作系统才是国产操作系统的机会，然后嵌入式操作系统现在有的国内公司已经做的相当好了，而且嵌入式操作系统可不像国产操作系统（都是某个Linux发行版换了个主题），像今天讲的Sylinx就是完全自己写的。</p>
+
+<p>跟在别人后面跑，永远你都超越不了人家，你只有跟他们站在同一起跑线，才有可能比别人跑出更好的成绩。这个思路是之前看一个清华教授的演讲学到的，他们做芯片的研究工作，当时大家开会定策略，两条路，一是研究国外已经做的很成熟的芯片技术，我们作为后来者一点一点从头重新做所有的设计，这需要绕过现有的所有专利。二是直接做最前沿的研究和国外的人站在同一起跑线上，最后他们选择了后者。结果证明是对的，他们做出了很多成果并都申请了专利，国外也在用他们的专利，这样我们有了能牵着别人的专利，再用他们的专利就不怕到时候突然他们不让我们用他们的专利了。</p>
+
+<p>操作系统这个会议让我思考良多，有几点，如此盛会清华北大的学生参与的寥寥无几，人们在听着这些错误的观点选择默认，没有人想去揭穿去指正，纳税人辛辛苦苦的钱被这些傻逼无情肆意的挥霍。越知道的多你会越失望，如果你对文革有很深的了解和理解（我指的是内幕）再结合今天的国家形式，今天的事，你不会只是对这几个人失望，而是对我们的政府失望，担忧我们国家的未来，因为如果依然是这样，有些事的发生仅仅就是早晚的事情了。</p>
+    </div>
+
+    
+    
+<div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Johnson</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">2015-11-28</span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+
+    
+    
+
+    <footer class="post-footer">
+      
+
+      
+      <nav class="post-nav">
+        
+          <a class="prev" href="/post/%E5%8D%81%E6%9C%88%E5%BB%BF%E5%9B%9B-3-8%E5%BA%A6pm2.5-117/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">十月廿四（-3~8℃）PM2.5: 117</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        
+          <a class="next" href="/post/%E5%8D%81%E6%9C%88%E5%8D%81%E4%BA%94--8-0%E5%BA%A6pm2.5-155/">
+            <span class="next-text nav-default">十月十五（-8~0℃）PM2.5: 155</span>
+            <span class="prev-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+  
+
+  
+      </div>  
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:johnson9009@163.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://www.linkedin.com/in/qiang-zhang-b8563888" class="iconfont icon-linkedin" title="linkedin"></a>
+      <a href="https://github.com/johnson9009" class="iconfont icon-github" title="github"></a>
+      <a href="https://weibo.com/u/3059419823?refer_flag=1005055010_&amp;is_all=1" class="iconfont icon-weibo" title="weibo"></a>
+  <a href="https://johnson9009.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    &copy; 
+    
+      2017-10-21 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Johnson Zhang</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+<script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+<script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+<script type="text/javascript" src="/dist/even.min.js?v=2.6.4"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+
+
+
+
+</body>
+</html>

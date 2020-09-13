@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>专业笔记 on 迷失岁月</title>
+    <link>https://johnson9009.github.io/categories/%E4%B8%93%E4%B8%9A%E7%AC%94%E8%AE%B0/</link>
+    <description>Recent content in 专业笔记 on 迷失岁月</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 07 Jul 2016 08:38:41 +0000</lastBuildDate>
+    
+	<atom:link href="https://johnson9009.github.io/categories/%E4%B8%93%E4%B8%9A%E7%AC%94%E8%AE%B0/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Cygwin, MinGW, MSYS, GnuWin32, GNU Utilities for Win32 and now MinGW-w64</title>
+      <link>https://johnson9009.github.io/post/cygwin-mingw-msys-gnuwin32-gnu-utilities-for-win32-and-now-mingw-w64/</link>
+      <pubDate>Thu, 07 Jul 2016 08:38:41 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/cygwin-mingw-msys-gnuwin32-gnu-utilities-for-win32-and-now-mingw-w64/</guid>
+      <description>&lt;p align=&#34;right&#34;&gt;
+  &lt;font color=&#34;#ff0000&#34;&gt;&lt;strong&gt;Reproduce from&lt;/strong&gt; &lt;a href=&#34;http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html&#34; target=&#34;_blank&#34;&gt;&lt;strong&gt;http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html&lt;/strong&gt;&lt;/a&gt;&lt;/font&gt;
+&lt;/p&gt;
+
+&lt;h4 id=&#34;introduction&#34;&gt;Introduction&lt;/h4&gt;
+
+&lt;p&gt;GNU on Windows has a sordid past. Not really, but sordid sounds so much more interesting than complicated. So here&amp;#8217;s how I understand it, without any emotion, this is really just a navigational exercise.&lt;/p&gt;
+
+&lt;h4 id=&#34;disclaimer&#34;&gt;Disclaimer&lt;/h4&gt;
+
+&lt;p&gt;What was just said and what I am about to say is entirely opinion and not based on fact. I hope that I do not offend anyone, but I am sure that I inevitably will, as much of my opinion is based on hearsay. In that case I apologize, and please remember that the purpose of this blog is purely selfish; it is a note to myself to remind me of what took me so long to finally understand. So instead of getting angry with me, perhaps post a comment and disabuse me of my still as yet incomplete knowledge.&lt;/p&gt;
+
+&lt;h4 id=&#34;cygwin&#34;&gt;Cygwin&lt;/h4&gt;
+
+&lt;p&gt;In the beginning there was &lt;a href=&#34;http://cygwin.com/&#34;&gt;Cygwin&lt;/a&gt;. Their tagline is &amp;ldquo;Get that Linux feeling &amp;#8211; on Windows!&amp;rdquo; This does a lot to explain exactly what Cygwin is, Linux emulated on Windows. What this means in practice is that Cygwin applications use the cygwin.dll, a common runtime that must be linked to any applications that run on Cygwin, and consequently any applicaton compiled with Cygwin gcc. So essentially, when you use Cygwin you are more or less stuck in Cygwin. True, you could distribute the cygwin.dll with your application, so it would appear to be &lt;em&gt;native&lt;/em&gt;, but it wouldn&amp;#8217;t be truly native. By native here I mean that it runs on one of the windows runtimes like the &lt;a href=&#34;http://en.wikipedia.org/wiki/Microsoft_Windows_library_files&#34;&gt;win32api or msvcrt&lt;/a&gt;. The &lt;a href=&#34;http://www.nano-editor.org/download.php&#34;&gt;Windows binary of GNU nano&lt;/a&gt; is an example of an application compiled using Cygwin that requires cygwin.dll to run. The probable downside of using this layer between the Windows API and your application may be potentially slower speed and some limits in its features.&lt;/p&gt;
+
+&lt;div align=&#34;right&#34;&gt;
+  
+&lt;/div&gt;
+
+&lt;h4 id=&#34;mingw&#34;&gt;MinGW&lt;/h4&gt;
+
+&lt;p&gt;From Cygwin was born &lt;a href=&#34;http://www.mingw.org/&#34;&gt;MinGW&lt;/a&gt;. I don&amp;#8217;t know if this is actually true, but that is what I&amp;#8217;ve heard. Either way it doesn&amp;#8217;t really matter. The essential thing to realize here is this.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

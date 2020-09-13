@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://johnson9009.github.io/sitemap.xml

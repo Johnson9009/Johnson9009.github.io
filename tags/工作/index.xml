@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>工作 on 迷失岁月</title>
+    <link>https://johnson9009.github.io/tags/%E5%B7%A5%E4%BD%9C/</link>
+    <description>Recent content in 工作 on 迷失岁月</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 10 Nov 2014 09:19:43 +0000</lastBuildDate>
+    
+	<atom:link href="https://johnson9009.github.io/tags/%E5%B7%A5%E4%BD%9C/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>UEFI开发环境的搭建</title>
+      <link>https://johnson9009.github.io/post/uefi%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/</link>
+      <pubDate>Mon, 10 Nov 2014 09:19:43 +0000</pubDate>
+      
+      <guid>https://johnson9009.github.io/post/uefi%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA/</guid>
+      <description>&lt;p&gt;以前写教程式的记录，总觉得写的特别详细，每个步骤所需要的东西都要直接加链接，这样别人可以直接点击就可以下载到，可是后来发现这样并不是好的方式，因为网上的链接过一段时间很可能就变了，看文章的人想去下载的时候发现下载不了，所以以后都不直接加链接而是精确地指明所需要的东西，然后用户自己一搜索就可以下载到了。&lt;/p&gt;
+
+&lt;p&gt;UEFI开发中，新手会遇到三个容易混淆的概念，EDKII、UDK2010/UDK2014和Intel提供给特定开发板的UEFI开发源码包，简单的说EDKII是UEFI标准的一个开源实现，其中包括好多个包，当然由于UEFI标准不是为了Intel一家芯片设定的，所以EDKII中会包括多种体系结构的支持。UDK2010/UDK2014可以说是一个Intel版的EDKII，其中使用了大量的EDKII的包，但只包含对Intel体系结构的支持。第三种Intel提供给特定开发板的UEFI开发源码包又可以说是UDK2010/UDK2014针对一个特定开发板的定制版本。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;系统要求：Microsoft Windows 7 SP1 Ultimate 64-bit&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

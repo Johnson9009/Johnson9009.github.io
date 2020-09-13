@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Cygwin, MinGW, MSYS, GnuWin32, GNU Utilities for Win32 and now MinGW-w64 - 迷失岁月</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Johnson" />
+  <meta name="description" content="Reproduce from http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html Introduction GNU on Windows has a sordid past. Not really, but sordid sounds so much more interesting than complicated. So here&amp;#8217;s how I understand it, without any emotion, this is really just a navigational exercise.
+Disclaimer What was just said and what I am about to say is entirely opinion and not based on fact. I hope that I do not offend anyone, but I am sure that I inevitably will, as much of my opinion is based on hearsay. In that case I apologize, and please remember that the purpose of this blog is purely selfish; it is a note to myself to remind me of what took me so long to finally understand. So instead of getting angry with me, perhaps post a comment and disabuse me of my still as yet incomplete knowledge.
+Cygwin In the beginning there was Cygwin. Their tagline is &amp;ldquo;Get that Linux feeling &amp;#8211; on Windows!&amp;rdquo; This does a lot to explain exactly what Cygwin is, Linux emulated on Windows. What this means in practice is that Cygwin applications use the cygwin.dll, a common runtime that must be linked to any applications that run on Cygwin, and consequently any applicaton compiled with Cygwin gcc. So essentially, when you use Cygwin you are more or less stuck in Cygwin. True, you could distribute the cygwin.dll with your application, so it would appear to be native, but it wouldn&amp;#8217;t be truly native. By native here I mean that it runs on one of the windows runtimes like the win32api or msvcrt. The Windows binary of GNU nano is an example of an application compiled using Cygwin that requires cygwin.dll to run. The probable downside of using this layer between the Windows API and your application may be potentially slower speed and some limits in its features.
+ MinGW From Cygwin was born MinGW. I don&amp;#8217;t know if this is actually true, but that is what I&amp;#8217;ve heard. Either way it doesn&amp;#8217;t really matter. The essential thing to realize here is this.
+" />
+
+  <meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.30.2" />
+
+
+<link rel="canonical" href="https://johnson9009.github.io/post/cygwin-mingw-msys-gnuwin32-gnu-utilities-for-win32-and-now-mingw-w64/" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" href="/favicon.ico" />
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<link href="/dist/even.min.css?v=2.6.4" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+<meta property="og:title" content="Cygwin, MinGW, MSYS, GnuWin32, GNU Utilities for Win32 and now MinGW-w64" />
+<meta property="og:description" content="
+  Reproduce from http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html
+
+
+Introduction
+
+GNU on Windows has a sordid past. Not really, but sordid sounds so much more interesting than complicated. So here&#8217;s how I understand it, without any emotion, this is really just a navigational exercise.
+
+Disclaimer
+
+What was just said and what I am about to say is entirely opinion and not based on fact. I hope that I do not offend anyone, but I am sure that I inevitably will, as much of my opinion is based on hearsay. In that case I apologize, and please remember that the purpose of this blog is purely selfish; it is a note to myself to remind me of what took me so long to finally understand. So instead of getting angry with me, perhaps post a comment and disabuse me of my still as yet incomplete knowledge.
+
+Cygwin
+
+In the beginning there was Cygwin. Their tagline is &ldquo;Get that Linux feeling &#8211; on Windows!&rdquo; This does a lot to explain exactly what Cygwin is, Linux emulated on Windows. What this means in practice is that Cygwin applications use the cygwin.dll, a common runtime that must be linked to any applications that run on Cygwin, and consequently any applicaton compiled with Cygwin gcc. So essentially, when you use Cygwin you are more or less stuck in Cygwin. True, you could distribute the cygwin.dll with your application, so it would appear to be native, but it wouldn&#8217;t be truly native. By native here I mean that it runs on one of the windows runtimes like the win32api or msvcrt. The Windows binary of GNU nano is an example of an application compiled using Cygwin that requires cygwin.dll to run. The probable downside of using this layer between the Windows API and your application may be potentially slower speed and some limits in its features.
+
+
+  
+
+
+MinGW
+
+From Cygwin was born MinGW. I don&#8217;t know if this is actually true, but that is what I&#8217;ve heard. Either way it doesn&#8217;t really matter. The essential thing to realize here is this." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://johnson9009.github.io/post/cygwin-mingw-msys-gnuwin32-gnu-utilities-for-win32-and-now-mingw-w64/" />
+
+
+
+<meta property="article:published_time" content="2016-07-07T08:38:41&#43;00:00"/>
+
+<meta property="article:modified_time" content="2016-07-07T08:38:41&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+<meta itemprop="name" content="Cygwin, MinGW, MSYS, GnuWin32, GNU Utilities for Win32 and now MinGW-w64">
+<meta itemprop="description" content="
+  Reproduce from http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html
+
+
+Introduction
+
+GNU on Windows has a sordid past. Not really, but sordid sounds so much more interesting than complicated. So here&#8217;s how I understand it, without any emotion, this is really just a navigational exercise.
+
+Disclaimer
+
+What was just said and what I am about to say is entirely opinion and not based on fact. I hope that I do not offend anyone, but I am sure that I inevitably will, as much of my opinion is based on hearsay. In that case I apologize, and please remember that the purpose of this blog is purely selfish; it is a note to myself to remind me of what took me so long to finally understand. So instead of getting angry with me, perhaps post a comment and disabuse me of my still as yet incomplete knowledge.
+
+Cygwin
+
+In the beginning there was Cygwin. Their tagline is &ldquo;Get that Linux feeling &#8211; on Windows!&rdquo; This does a lot to explain exactly what Cygwin is, Linux emulated on Windows. What this means in practice is that Cygwin applications use the cygwin.dll, a common runtime that must be linked to any applications that run on Cygwin, and consequently any applicaton compiled with Cygwin gcc. So essentially, when you use Cygwin you are more or less stuck in Cygwin. True, you could distribute the cygwin.dll with your application, so it would appear to be native, but it wouldn&#8217;t be truly native. By native here I mean that it runs on one of the windows runtimes like the win32api or msvcrt. The Windows binary of GNU nano is an example of an application compiled using Cygwin that requires cygwin.dll to run. The probable downside of using this layer between the Windows API and your application may be potentially slower speed and some limits in its features.
+
+
+  
+
+
+MinGW
+
+From Cygwin was born MinGW. I don&#8217;t know if this is actually true, but that is what I&#8217;ve heard. Either way it doesn&#8217;t really matter. The essential thing to realize here is this.">
+
+
+<meta itemprop="datePublished" content="2016-07-07T08:38:41&#43;00:00" />
+<meta itemprop="dateModified" content="2016-07-07T08:38:41&#43;00:00" />
+<meta itemprop="wordCount" content="997">
+
+
+
+<meta itemprop="keywords" content="C/C&#43;&#43;,Linux," />
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Cygwin, MinGW, MSYS, GnuWin32, GNU Utilities for Win32 and now MinGW-w64"/>
+<meta name="twitter:description" content="
+  Reproduce from http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html
+
+
+Introduction
+
+GNU on Windows has a sordid past. Not really, but sordid sounds so much more interesting than complicated. So here&#8217;s how I understand it, without any emotion, this is really just a navigational exercise.
+
+Disclaimer
+
+What was just said and what I am about to say is entirely opinion and not based on fact. I hope that I do not offend anyone, but I am sure that I inevitably will, as much of my opinion is based on hearsay. In that case I apologize, and please remember that the purpose of this blog is purely selfish; it is a note to myself to remind me of what took me so long to finally understand. So instead of getting angry with me, perhaps post a comment and disabuse me of my still as yet incomplete knowledge.
+
+Cygwin
+
+In the beginning there was Cygwin. Their tagline is &ldquo;Get that Linux feeling &#8211; on Windows!&rdquo; This does a lot to explain exactly what Cygwin is, Linux emulated on Windows. What this means in practice is that Cygwin applications use the cygwin.dll, a common runtime that must be linked to any applications that run on Cygwin, and consequently any applicaton compiled with Cygwin gcc. So essentially, when you use Cygwin you are more or less stuck in Cygwin. True, you could distribute the cygwin.dll with your application, so it would appear to be native, but it wouldn&#8217;t be truly native. By native here I mean that it runs on one of the windows runtimes like the win32api or msvcrt. The Windows binary of GNU nano is an example of an application compiled using Cygwin that requires cygwin.dll to run. The probable downside of using this layer between the Windows API and your application may be potentially slower speed and some limits in its features.
+
+
+  
+
+
+MinGW
+
+From Cygwin was born MinGW. I don&#8217;t know if this is actually true, but that is what I&#8217;ve heard. Either way it doesn&#8217;t really matter. The essential thing to realize here is this."/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">The Time When I Feel Lost ...</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">The Time When I Feel Lost ...</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Cygwin, MinGW, MSYS, GnuWin32, GNU Utilities for Win32 and now MinGW-w64</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2016-07-07 </span>
+        <div class="post-category">
+            <a href="/categories/%E4%B8%93%E4%B8%9A%E7%AC%94%E8%AE%B0/">专业笔记</a>
+          </div>
+        
+      </div>
+    </header>
+
+    
+    
+<div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content">
+      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#disclaimer">Disclaimer</a></li>
+<li><a href="#cygwin">Cygwin</a></li>
+<li><a href="#mingw">MinGW</a></li>
+<li><a href="#msys">MSYS</a></li>
+<li><a href="#gnuwin32-and-gnu-utilities-for-windows">GnuWin32 and GNU Utilities for Windows</a></li>
+<li><a href="#mingw-w64">MinGW-w64</a></li>
+<li><a href="#epilogue">Epilogue</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+</div>
+
+    
+    <div class="post-content">
+      <p align="right">
+  <font color="#ff0000"><strong>Reproduce from</strong> <a href="http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html" target="_blank"><strong>http://poquitopicante.blogspot.com/2012/08/cygwin-mingw-msys-gnuwin32-gnu.html</strong></a></font>
+</p>
+
+<h4 id="introduction">Introduction</h4>
+
+<p>GNU on Windows has a sordid past. Not really, but sordid sounds so much more interesting than complicated. So here&#8217;s how I understand it, without any emotion, this is really just a navigational exercise.</p>
+
+<h4 id="disclaimer">Disclaimer</h4>
+
+<p>What was just said and what I am about to say is entirely opinion and not based on fact. I hope that I do not offend anyone, but I am sure that I inevitably will, as much of my opinion is based on hearsay. In that case I apologize, and please remember that the purpose of this blog is purely selfish; it is a note to myself to remind me of what took me so long to finally understand. So instead of getting angry with me, perhaps post a comment and disabuse me of my still as yet incomplete knowledge.</p>
+
+<h4 id="cygwin">Cygwin</h4>
+
+<p>In the beginning there was <a href="http://cygwin.com/">Cygwin</a>. Their tagline is &ldquo;Get that Linux feeling &#8211; on Windows!&rdquo; This does a lot to explain exactly what Cygwin is, Linux emulated on Windows. What this means in practice is that Cygwin applications use the cygwin.dll, a common runtime that must be linked to any applications that run on Cygwin, and consequently any applicaton compiled with Cygwin gcc. So essentially, when you use Cygwin you are more or less stuck in Cygwin. True, you could distribute the cygwin.dll with your application, so it would appear to be <em>native</em>, but it wouldn&#8217;t be truly native. By native here I mean that it runs on one of the windows runtimes like the <a href="http://en.wikipedia.org/wiki/Microsoft_Windows_library_files">win32api or msvcrt</a>. The <a href="http://www.nano-editor.org/download.php">Windows binary of GNU nano</a> is an example of an application compiled using Cygwin that requires cygwin.dll to run. The probable downside of using this layer between the Windows API and your application may be potentially slower speed and some limits in its features.</p>
+
+<div align="right">
+  
+</div>
+
+<h4 id="mingw">MinGW</h4>
+
+<p>From Cygwin was born <a href="http://www.mingw.org/">MinGW</a>. I don&#8217;t know if this is actually true, but that is what I&#8217;ve heard. Either way it doesn&#8217;t really matter. The essential thing to realize here is this.</p>
+
+<blockquote>
+<p>MinGW creates native applications for Windows using native libraries.</p>
+This means exactly what it sounds like, applications compiled using MinGW&#8217;s compilers (gcc, g++, gfortran, etc.) will run on any Windows machine natively without any runtime other than the Windows API or mscvrt. Now it might be fun to speculate about some internal strife or a passionate drive of a group of individuals with some bold ideal, but that&#8217;s irrelevant to this fundamental difference between the Cygwin and MinGW.</p>
+</blockquote>
+
+<h4 id="msys">MSYS</h4>
+
+<p><a href="http://www.mingw.org/wiki/msys/">MSYS</a> may seem like a variation on Cygwin, except it is really meant to be used as an environment for running shell scripts, similar to <a href="http://www.gnu.org/software/bash/">bash (the Bourne Again SHell)</a>. It&#8217;s true that if you compile an application using the MSYS version of gcc, then you will need to link it to the msys-1.0.dll, so in a sense it is the same as Cygwin. The difference is really in a state of mind. MSYS is presumably part of MinGW, which stands for Minimalist GNU for Windows. What that translates to is that MinGW and MSYS contain only the most essential tools required for developing native applications for Windows using the GNU open source suite of compilers, whereas Cygwin aims to provide Windows users every application available to Linux. In Cygwin you will find <a href="http://www.python.org/">Python</a>, <a href="http://www.gtk.org/">GTK</a>, <a href="http://www.nano-editor.org/">nano</a>, <a href="http://www.ruby-lang.org/en/">Ruby</a>, <a href="http://git-scm.com/">Git</a>, even some games I think, whereas in MinGW you will only find libraries most often used in common code. However there is a huge chunk of open source code that is compiled using <a href="http://en.wikipedia.org/wiki/GNU_build_system">autotools</a> and depending on shell scripting, which I think is where MSYS gets involved. MSYS makes it easier to do this. True autotools, make and shell script functions have been ported as native win32 applications, but since they are only used as temporary tools to get to the finished product (a natively compiled win32 application) and the results don&#8217;t depend on any of those temporary tools, why go through the effort of duplicating what Cygwin has already done so nicely?</p>
+
+<h4 id="gnuwin32-and-gnu-utilities-for-windows">GnuWin32 and GNU Utilities for Windows</h4>
+
+<p>If you were just reading the section above, then continuing on, <a href="http://gnuwin32.sourceforge.net/">GnuWin32</a> and the now defunct <a href="http://unxutils.sourceforge.net/">GNU Utilities for Windows</a>seem to do precisely that. Both of these generally utilize MinGW to port GNU applications that were native to Linux or Cygwin to run natively on Windows. And in fact many open source projects now try to configure options for some Windows compiler, be it MinGW, <a href="http://www.microsoft.com/visualstudio/en-us">MSVC</a> or <a href="http://www.embarcadero.com/products/cbuilder/free-compiler">BCC</a> (really, I haven&#8217;t seen this too often although <a href="http://www.embarcadero.com/">apparently it is still out there</a>, wow they even have Delphi!). Some projects are optionally opting for <a href="http://www.cmake.org/">CMake</a> and alternative to Autotools. OK, so the key distinction here is that these are both compiled using MinGW and are basically an alternate to MSYS, if you prefer to continue to use the native Windows CMD console or something like Powershell.</p>
+
+<h4 id="mingw-w64">MinGW-w64</h4>
+
+<p><a href="http://mingw-w64.sourceforge.net/">MinGW-w64</a> is a fork of MinGW that allows you to cross compile code from one machine to another. For example, say you want to make 64-bit code, but you are on a 32-bit machine or a Linux box, or using Cygwin, then you would use MinGW-w64. The &ldquo;w64&rdquo; comes from it&#8217;s ability to compile 64-bit code, which is not currently available (AFAIK) with MinGW (sometimes called mingw32). There are alternate distributions of both MinGW and MinGW-w64 provided by<a href="http://tdm-gcc.tdragon.net/">TDM</a>. Also there are other cross-compilers, such as <a href="http://mxe.cc/">mxe.cc</a>, but it is only for *nix (Linux/Unix). Coincidentally MinGW are MinGW-w64 both available as cross-compilers in most Linux distro repositories. Ubuntu, Fedora and Suse all have it. MacPorts, Fink and Homebrew may have them too. Same probably goes for mxe.cc. And who knows there are probably more cross-compilers out there as well.</p>
+
+<h4 id="epilogue">Epilogue</h4>
+
+<p>Ah. So glad to get that all down, finally. So the moral of the story is this.</p>
+
+<blockquote>
+<p><strong>If you want to use native Windows apps compiled using GNU gcc use MinGW, but <em>do not polute your toolchain with any MSYS</em> or Cygwin libraries <em>or you will be sorry</em>.</strong></p></p>
+</blockquote>
+    </div>
+
+    
+    
+<div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Johnson</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">2016-07-07</span>
+  </p>
+  
+  <p class="copyright-item">
+    <span class="item-title">许可协议</span>
+    <span class="item-content"><a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a></span>
+  </p>
+</div>
+
+    
+    
+
+    <footer class="post-footer">
+      <div class="post-tags">
+          
+          <a href="/tags/c/c&#43;&#43;/">C/C&#43;&#43;</a>
+          
+          <a href="/tags/linux/">Linux</a>
+          
+        </div>
+
+      
+      <nav class="post-nav">
+        
+          <a class="prev" href="/post/%E7%A8%8B%E5%BA%8F%E5%BC%80%E5%8F%91%E4%B8%8E%E6%9E%84%E5%BB%BA/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">程序开发与构建</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        
+          <a class="next" href="/post/%E5%B8%A6code-review%E7%9A%84%E4%BC%98%E7%A7%80git%E5%BC%80%E5%8F%91%E6%9E%B6%E6%9E%84/">
+            <span class="next-text nav-default">带Code Review的优秀Git开发架构</span>
+            <span class="prev-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+  
+
+  
+      </div>  
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:johnson9009@163.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://www.linkedin.com/in/qiang-zhang-b8563888" class="iconfont icon-linkedin" title="linkedin"></a>
+      <a href="https://github.com/johnson9009" class="iconfont icon-github" title="github"></a>
+      <a href="https://weibo.com/u/3059419823?refer_flag=1005055010_&amp;is_all=1" class="iconfont icon-weibo" title="weibo"></a>
+  <a href="https://johnson9009.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    &copy; 
+    
+      2017-10-21 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Johnson Zhang</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+<script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+<script type="text/javascript" src="/lib/jquery/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+<script type="text/javascript" src="/dist/even.min.js?v=2.6.4"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+
+
+
+
+</body>
+</html>
