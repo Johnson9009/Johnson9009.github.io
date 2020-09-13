@@ -3,7 +3,7 @@ install:
 
 script:
   - cd src
-  - ../bin/hugo
+  - ../bin/hugo -b https://johnson9009.github.io
 
 branches:
   only:

@@ -1,4 +1,4 @@
-baseURL = "https://ilostime.com"
+baseURL = "https://johnson9009.gitee.io"
 languageCode = "en"
 defaultContentLanguage = "en"
 title = "迷失岁月"
@@ -90,13 +90,13 @@ copyright = ""            # default: author.name ↓        # 默认为下面配
     alipay = "/path/to/your/alipay-qr-code.png"           # 支付宝二维码
 
   [params.social]                                         # 社交链接
-    a-email = "mailto:Johnson9009@163.com"
+    a-email = "mailto:johnson9009@163.com"
     #b-stack-overflow = "http://localhost:1313"
     #c-twitter = "http://localhost:1313"
     #d-facebook = "http://localhost:1313"
     e-linkedin = "https://www.linkedin.com/in/qiang-zhang-b8563888"
     #f-google = "http://localhost:1313"
-    g-github = "https://github.com/Johnson9009"
+    g-github = "https://github.com/johnson9009"
     h-weibo = "https://weibo.com/u/3059419823?refer_flag=1005055010_&is_all=1"
     #i-zhihu = "http://localhost:1313"
     #j-douban = "http://localhost:1313"
